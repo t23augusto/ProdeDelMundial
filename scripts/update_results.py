@@ -15,6 +15,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 
 API_URL = "https://api.football-data.org/v4/competitions/WC/matches"
@@ -23,9 +24,22 @@ INDEX_PATH = "index.html"
 
 
 def fetch_matches(token):
-    req = urllib.request.Request(API_URL, headers={"X-Auth-Token": token})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    req = urllib.request.Request(
+        API_URL,
+        headers={
+            "X-Auth-Token": token,
+            "User-Agent": "prode-mundial-2026-bot/1.0",
+        },
+    )
+    last_err = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except Exception as e:
+            last_err = e
+            time.sleep(3)
+    raise last_err
 
 
 def load_calendario():
