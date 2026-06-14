@@ -74,6 +74,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .dh{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .dlabel{font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;color:#fff;background:var(--purple);padding:5px 16px;border-radius:20px;flex-shrink:0;}
 .dline{flex:1;height:1px;background:var(--border);}
+
+.rt-header{display:flex;align-items:center;gap:10px;margin:24px 12px 14px;}
+.rt-header .rt-title{font-family:'Poppins',sans-serif;font-weight:900;font-size:14px;letter-spacing:1px;color:#fff;background:var(--txt);padding:8px 18px;border-radius:20px;flex-shrink:0;}
+.rt-header .rt-line{flex:1;height:3px;background:linear-gradient(90deg,var(--purple),var(--orange));border-radius:2px;}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;transition:border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.06);}
 .mc.done{border-color:var(--teal);}
 .mtime{font-size:11px;color:var(--muted);font-weight:800;display:flex;align-items:center;gap:4px;}
@@ -154,6 +158,33 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .cbar-e{background:var(--teal);height:100%;}
 .cbar-v{background:var(--red);height:100%;}
 .cbar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;}
+
+.hoy-wrap{margin:0 12px 16px;}
+.hoy-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.hoy-title{font-family:'Poppins',sans-serif;font-weight:900;font-size:16px;color:var(--txt);display:flex;align-items:center;gap:6px;}
+.hoy-title .dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse-dot 1.5s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hoy-pselect{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--txt);}
+.hoy-empty{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;color:var(--muted);font-size:13px;font-weight:700;}
+.hoy-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px;}
+.hoy-card.played{border-color:var(--teal);}
+.hoy-mh{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.hoy-time{font-size:12px;font-weight:800;color:var(--orange);background:#FFF0E8;padding:3px 8px;border-radius:8px;}
+.hoy-grp{font-size:11px;font-weight:800;color:var(--muted);}
+.hoy-res{margin-left:auto;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;}
+.hoy-res.l{background:#E6F0FF;color:var(--blue);}
+.hoy-res.e{background:#E0F7F5;color:var(--teal);}
+.hoy-res.v{background:#FBE7EC;color:var(--red);}
+.hoy-teams{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;margin-bottom:8px;}
+.hoy-teams .vs{font-size:11px;color:var(--muted);font-weight:700;}
+.hoy-flag{font-size:22px;}
+.hoy-odds-label{font-size:10px;color:var(--muted);font-weight:800;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;}
+.hoy-mine{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.hoy-mine .tag{padding:2px 8px;border-radius:8px;font-size:11px;font-weight:800;}
+.hoy-mine .tag.ok{background:#E0F7F5;color:var(--teal);}
+.hoy-mine .tag.ko{background:#FBE7EC;color:var(--red);}
+.hoy-mine .tag.pend{background:var(--bg);color:var(--muted);}
+
 .cempty{text-align:center;font-size:12px;color:var(--muted);padding:30px 10px;}
 
 /* MI PRONOSTICO - buscador de jugador */
@@ -220,6 +251,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 </div>
 
 <div class="view on" id="vr">
+
+<div class="hoy-wrap" id="hoyWrap" style="display:none;">
+  <div class="hoy-head">
+    <div class="hoy-title"><span class="dot"></span>LOS PARTIDOS DE HOY</div>
+    <select class="hoy-pselect" id="hoyPlayerSelect" onchange="onHoyPlayerSelect(this.value)">
+      <option value="">Comparar con...</option>
+    </select>
+  </div>
+  <div id="hoyBody"></div>
+</div>
+
+<div class="rt-header"><span class="rt-title">📋 RESULTADOS TOTALES</span><div class="rt-line"></div></div>
 
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 11-Jun</span><div class="dline"></div></div>
@@ -7482,6 +7525,7 @@ function SR(mi, v) {
   autoSave();
   updatePronoRow(mi);
   renderTicker();
+  renderHoyWidget();
 }
 
 function UC(mi) {
@@ -7775,6 +7819,109 @@ function renderTicker() {
   var track = document.getElementById('tickerTrack');
   var content = items.map(function(it){ return '<span class="ticker-item">' + it + '</span>'; }).join('<span class="ticker-sep">•</span>');
   track.innerHTML = content + '<span class="ticker-sep">•</span>' + content;
+}
+
+// ── LOS PARTIDOS DE HOY ──────────────────────────────────────────────────
+var MONTH_ABBR = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function getTodayART() {
+  var now = new Date();
+  var artStr = now.toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: 'numeric'});
+  var parts = artStr.split('/'); // MM/DD
+  var mm = parseInt(parts[0], 10);
+  var dd = parts[1];
+  return dd + '-' + MONTH_ABBR[mm-1];
+}
+
+function onHoyPlayerSelect(val) {
+  if (val === '') localStorage.removeItem('hoy_pi');
+  else localStorage.setItem('hoy_pi', val);
+  renderHoyWidget();
+}
+
+function populateHoyPlayerSelect() {
+  var sel = document.getElementById('hoyPlayerSelect');
+  if (!sel) return;
+  var order = P.map(function(name, pi){ return {name: name, pi: pi}; });
+  order.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
+  var saved = localStorage.getItem('hoy_pi');
+  var html = '<option value="">Comparar con...</option>';
+  order.forEach(function(item){
+    html += '<option value="'+item.pi+'"'+(saved===String(item.pi)?' selected':'')+'>'+item.name+'</option>';
+  });
+  sel.innerHTML = html;
+}
+
+function renderHoyWidget() {
+  var wrap = document.getElementById('hoyWrap');
+  var body = document.getElementById('hoyBody');
+  if (!wrap || !body) return;
+  if (P.length === 0) { wrap.style.display = 'none'; return; }
+
+  var today = getTodayART();
+  var todayMis = [];
+  for (var mi = 0; mi < 72; mi++) if (MATCH_DATES[mi] === today) todayMis.push(mi);
+
+  if (todayMis.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+
+  var myPi = localStorage.getItem('hoy_pi');
+  myPi = (myPi !== null && myPi !== '') ? parseInt(myPi) : null;
+
+  var html = '';
+  todayMis.forEach(function(mi){
+    var c = pickCounts(mi);
+    var total = c.l + c.e + c.v;
+    var pl = total ? Math.round(c.l/total*100) : 0;
+    var pe = total ? Math.round(c.e/total*100) : 0;
+    var pv = total ? (100 - pl - pe) : 0;
+    var res = results[mi];
+    var resTxt = res ? ({1:'1 - Local',3:'X - Empate',2:'2 - Visit.'}[res]) : '';
+    var resClass = res ? ({1:'l',3:'e',2:'v'}[res]) : '';
+    var flag1 = ''; var flag2 = '';
+    var f1m = document.querySelector('#card_'+mi+' .tn-wrap.home .tflag');
+    var f2m = document.querySelector('#card_'+mi+' .tn-wrap.away .tflag');
+    if (f1m) flag1 = f1m.textContent;
+    if (f2m) flag2 = f2m.textContent;
+    var time = '';
+    var tm = document.querySelector('#card_'+mi+' .mtime');
+    if (tm) time = tm.textContent.replace('🕐','').trim();
+
+    html += '<div class="hoy-card'+(res?' played':'')+'">';
+    html += '<div class="hoy-mh"><span class="hoy-time">🕐 '+time+'</span><span class="hoy-grp">P'+(mi+1)+' · Grupo '+matchGroup(mi)+'</span>';
+    if (res) html += '<span class="hoy-res '+resClass+'">'+resTxt+'</span>';
+    html += '</div>';
+    html += '<div class="hoy-teams"><span class="hoy-flag">'+flag1+'</span>'+MATCHES[mi][0]+'<span class="vs">vs</span>'+MATCHES[mi][1]+'<span class="hoy-flag">'+flag2+'</span></div>';
+    html += '<div class="hoy-odds-label">Cómo eligió la mayoría ('+P.length+' pronósticos)</div>';
+    html += barRow(mi, c);
+
+    if (myPi !== null) {
+      var myPick = PK[myPi][mi];
+      var myTxt = {1:'Local',3:'Empate',2:'Visitante'}[myPick];
+      var tagClass = 'pend', tagTxt = 'Tu pronóstico: '+myTxt;
+      if (res) {
+        if (myPick === res) { tagClass = 'ok'; tagTxt = '✓ Acertaste: '+myTxt; }
+        else { tagClass = 'ko'; tagTxt = '✗ Tu pronóstico: '+myTxt; }
+      }
+      html += '<div class="hoy-mine">'+P[myPi]+': <span class="tag '+tagClass+'">'+tagTxt+'</span></div>';
+    }
+
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+}
+
+function matchGroup(mi) {
+  var el = document.querySelector('#card_'+mi+' .mn');
+  if (el) {
+    var m = el.textContent.match(/Grupo (\w+)/);
+    if (m) return m[1];
+  }
+  return '';
 }
 
 function pickCounts(mi) {
@@ -8284,6 +8431,8 @@ loadResults();
 restoreAllCards();
 populatePlayerSelect();
 renderTicker();
+populateHoyPlayerSelect();
+renderHoyWidget();
 </script>
 </body>
 </html>
