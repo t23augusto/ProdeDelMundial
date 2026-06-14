@@ -45,6 +45,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .prog-bar{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
 .prog-fill{height:100%;background:var(--teal);border-radius:4px;transition:width .4s ease;}
 .prog-txt{font-size:12px;color:var(--muted);white-space:nowrap;font-weight:800;}
+
+.ticker-wrap{display:flex;align-items:center;background:#1a1a1a;border-bottom:3px solid var(--red);overflow:hidden;position:relative;}
+.ticker-label{flex-shrink:0;background:var(--red);color:#fff;font-family:'Poppins',sans-serif;font-weight:900;font-size:11px;letter-spacing:1px;padding:8px 12px;white-space:nowrap;}
+.ticker-track-wrap{flex:1;overflow:hidden;position:relative;}
+.ticker-track{display:inline-flex;align-items:center;white-space:nowrap;animation:ticker-scroll 40s linear infinite;padding-left:16px;}
+.ticker-item{color:#fff;font-size:12px;font-weight:700;padding:8px 0;}
+.ticker-sep{color:var(--lime);font-weight:900;padding:8px 16px;}
+@keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
 .save-badge{font-size:11px;color:var(--green);font-weight:700;opacity:0;transition:opacity .4s;white-space:nowrap;}
 .save-badge.on{opacity:1;}
 
@@ -65,8 +74,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .dh{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .dlabel{font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;color:#fff;background:var(--purple);padding:5px 16px;border-radius:20px;flex-shrink:0;}
 .dline{flex:1;height:1px;background:var(--border);}
-.mc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;transition:border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.06);}
 .mc.done{border-color:var(--teal);}
+.mtime{font-size:11px;color:var(--muted);font-weight:800;display:flex;align-items:center;gap:4px;}
+.tflag{font-size:20px;line-height:1;}
+.tn-wrap{flex:1;display:flex;align-items:center;gap:8px;}
+.tn-wrap.home{flex-direction:row-reverse;text-align:right;justify-content:flex-end;}
+.tn-wrap.away{justify-content:flex-start;}
 .mh{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#FAF8F4;border-bottom:1px solid var(--border);}
 .mn{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.5px;}
 .rl{font-size:11px;font-weight:800;padding:3px 10px;border-radius:10px;display:none;}
@@ -107,8 +121,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .th-fixed{position:sticky;color:var(--txt);font-weight:800;padding:8px 6px;text-align:center;border-bottom:2px solid var(--purple);border-right:1px solid var(--border);}
 .th-partido{left:0;width:36px;min-width:36px;max-width:36px;background:var(--surface);z-index:20;border-left:1px solid var(--border);}
 .th-match{left:36px;width:150px;min-width:150px;max-width:150px;text-align:left;background:var(--surface);z-index:20;}
-.th-res{left:186px;width:46px;min-width:46px;max-width:46px;background:#FBE7EC;z-index:20;border-right:2px solid var(--red);color:var(--red);}
-.th-player{background:var(--surface);color:var(--muted);font-weight:700;padding:8px 2px;text-align:center;width:36px;min-width:36px;max-width:36px;overflow:hidden;text-overflow:ellipsis;border-bottom:2px solid var(--purple);border-right:1px solid var(--border);}
+.th-res{left:186px;width:46px;min-width:46px;max-width:46px;background:#FBE7EC;z-index:20;border-right:2px solid var(--red);color:var(--red);height:120px;writing-mode:vertical-rl;text-orientation:mixed;white-space:nowrap;}
+.th-player{background:var(--surface);color:var(--muted);font-weight:700;padding:8px 2px;text-align:center;width:36px;min-width:36px;max-width:36px;height:120px;overflow:hidden;border-bottom:2px solid var(--purple);border-right:1px solid var(--border);writing-mode:vertical-rl;text-orientation:mixed;white-space:nowrap;}
 .td-fixed{position:sticky;padding:5px 4px;font-weight:700;font-size:11px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
 .td-num{left:0;width:36px;min-width:36px;max-width:36px;background:var(--surface);z-index:10;text-align:center;color:var(--muted);font-size:10px;border-left:1px solid var(--border);}
 .td-match{left:36px;width:150px;min-width:150px;max-width:150px;background:var(--surface);z-index:10;overflow:hidden;text-overflow:ellipsis;color:var(--txt);}
@@ -196,6 +210,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 
+<div class="ticker-wrap" id="tickerWrap" style="display:none;">
+  <div class="ticker-label">EN VIVO</div>
+  <div class="ticker-track-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
+</div>
+
 <div class="topbar">
   <button class="btn-export" onclick="exportHTML()">⬇ Guardar HTML</button>
 </div>
@@ -205,8 +224,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 11-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_0">
-  <div class="mh"><span class="mn">P1 · Grupo A</span><span id="rl_0" class="rl">2-Visit.</span><span id="ck_0"></span></div>
-  <div class="mt"><div class="tn home">México</div><div class="vs">VS</div><div class="tn away">Sudáfrica</div></div>
+  <div class="mh"><span class="mn">P1 · Grupo A</span><span class="mtime">🕐 16:00</span><span id="rl_0" class="rl">2-Visit.</span><span id="ck_0"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇲🇽</span><div class="tn home">México</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇿🇦</span><div class="tn away">Sudáfrica</div></div></div>
   <div class="pr">
     <a id="rb_0_1" href="javascript:void(0)" onclick="SR(0,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_0_3" href="javascript:void(0)" onclick="SR(0,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -214,8 +233,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_1">
-  <div class="mh"><span class="mn">P2 · Grupo A</span><span id="rl_1" class="rl">2-Visit.</span><span id="ck_1"></span></div>
-  <div class="mt"><div class="tn home">Corea del Sur</div><div class="vs">VS</div><div class="tn away">Rep. Checa</div></div>
+  <div class="mh"><span class="mn">P2 · Grupo A</span><span class="mtime">🕐 23:00</span><span id="rl_1" class="rl">2-Visit.</span><span id="ck_1"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇰🇷</span><div class="tn home">Corea del Sur</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇿</span><div class="tn away">Rep. Checa</div></div></div>
   <div class="pr">
     <a id="rb_1_1" href="javascript:void(0)" onclick="SR(1,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_1_3" href="javascript:void(0)" onclick="SR(1,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -226,8 +245,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 12-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_6">
-  <div class="mh"><span class="mn">P7 · Grupo B</span><span id="rl_6" class="rl">X-Empate</span><span id="ck_6"></span></div>
-  <div class="mt"><div class="tn home">Canadá</div><div class="vs">VS</div><div class="tn away">Bosnia-Herz.</div></div>
+  <div class="mh"><span class="mn">P7 · Grupo B</span><span class="mtime">🕐 16:00</span><span id="rl_6" class="rl">X-Empate</span><span id="ck_6"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇦</span><div class="tn home">Canadá</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇧🇦</span><div class="tn away">Bosnia-Herz.</div></div></div>
   <div class="pr">
     <a id="rb_6_1" href="javascript:void(0)" onclick="SR(6,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_6_3" href="javascript:void(0)" onclick="SR(6,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -235,8 +254,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_18">
-  <div class="mh"><span class="mn">P19 · Grupo D</span><span id="rl_18" class="rl">X-Empate</span><span id="ck_18"></span></div>
-  <div class="mt"><div class="tn home">Estados Unidos</div><div class="vs">VS</div><div class="tn away">Paraguay</div></div>
+  <div class="mh"><span class="mn">P19 · Grupo D</span><span class="mtime">🕐 22:00</span><span id="rl_18" class="rl">X-Empate</span><span id="ck_18"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇺🇸</span><div class="tn home">Estados Unidos</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇵🇾</span><div class="tn away">Paraguay</div></div></div>
   <div class="pr">
     <a id="rb_18_1" href="javascript:void(0)" onclick="SR(18,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_18_3" href="javascript:void(0)" onclick="SR(18,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -247,8 +266,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 13-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_7">
-  <div class="mh"><span class="mn">P8 · Grupo B</span><span id="rl_7" class="rl">2-Visit.</span><span id="ck_7"></span></div>
-  <div class="mt"><div class="tn home">Qatar</div><div class="vs">VS</div><div class="tn away">Suiza</div></div>
+  <div class="mh"><span class="mn">P8 · Grupo B</span><span class="mtime">🕐 16:00</span><span id="rl_7" class="rl">2-Visit.</span><span id="ck_7"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇶🇦</span><div class="tn home">Qatar</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇭</span><div class="tn away">Suiza</div></div></div>
   <div class="pr">
     <a id="rb_7_1" href="javascript:void(0)" onclick="SR(7,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_7_3" href="javascript:void(0)" onclick="SR(7,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -256,8 +275,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_12">
-  <div class="mh"><span class="mn">P13 · Grupo C</span><span id="rl_12" class="rl">2-Visit.</span><span id="ck_12"></span></div>
-  <div class="mt"><div class="tn home">Brasil</div><div class="vs">VS</div><div class="tn away">Marruecos</div></div>
+  <div class="mh"><span class="mn">P13 · Grupo C</span><span class="mtime">🕐 19:00</span><span id="rl_12" class="rl">2-Visit.</span><span id="ck_12"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇧🇷</span><div class="tn home">Brasil</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇲🇦</span><div class="tn away">Marruecos</div></div></div>
   <div class="pr">
     <a id="rb_12_1" href="javascript:void(0)" onclick="SR(12,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_12_3" href="javascript:void(0)" onclick="SR(12,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -265,8 +284,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_13">
-  <div class="mh"><span class="mn">P14 · Grupo C</span><span id="rl_13" class="rl">2-Visit.</span><span id="ck_13"></span></div>
-  <div class="mt"><div class="tn home">Haití</div><div class="vs">VS</div><div class="tn away">Escocia</div></div>
+  <div class="mh"><span class="mn">P14 · Grupo C</span><span class="mtime">🕐 22:00</span><span id="rl_13" class="rl">2-Visit.</span><span id="ck_13"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇭🇹</span><div class="tn home">Haití</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🏴</span><div class="tn away">Escocia</div></div></div>
   <div class="pr">
     <a id="rb_13_1" href="javascript:void(0)" onclick="SR(13,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_13_3" href="javascript:void(0)" onclick="SR(13,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -274,8 +293,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_19">
-  <div class="mh"><span class="mn">P20 · Grupo D</span><span id="rl_19" class="rl">X-Empate</span><span id="ck_19"></span></div>
-  <div class="mt"><div class="tn home">Australia</div><div class="vs">VS</div><div class="tn away">Turquía</div></div>
+  <div class="mh"><span class="mn">P20 · Grupo D</span><span class="mtime">🕐 01:00</span><span id="rl_19" class="rl">X-Empate</span><span id="ck_19"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇦🇺</span><div class="tn home">Australia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇹🇷</span><div class="tn away">Turquía</div></div></div>
   <div class="pr">
     <a id="rb_19_1" href="javascript:void(0)" onclick="SR(19,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_19_3" href="javascript:void(0)" onclick="SR(19,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -286,8 +305,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 14-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_24">
-  <div class="mh"><span class="mn">P25 · Grupo E</span><span id="rl_24" class="rl">X-Empate</span><span id="ck_24"></span></div>
-  <div class="mt"><div class="tn home">Alemania</div><div class="vs">VS</div><div class="tn away">Curazao</div></div>
+  <div class="mh"><span class="mn">P25 · Grupo E</span><span class="mtime">🕐 14:00</span><span id="rl_24" class="rl">X-Empate</span><span id="ck_24"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇩🇪</span><div class="tn home">Alemania</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇼</span><div class="tn away">Curazao</div></div></div>
   <div class="pr">
     <a id="rb_24_1" href="javascript:void(0)" onclick="SR(24,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_24_3" href="javascript:void(0)" onclick="SR(24,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -295,8 +314,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_25">
-  <div class="mh"><span class="mn">P26 · Grupo E</span><span id="rl_25" class="rl">2-Visit.</span><span id="ck_25"></span></div>
-  <div class="mt"><div class="tn home">Costa de Marfil</div><div class="vs">VS</div><div class="tn away">Ecuador</div></div>
+  <div class="mh"><span class="mn">P26 · Grupo E</span><span class="mtime">🕐 20:00</span><span id="rl_25" class="rl">2-Visit.</span><span id="ck_25"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇮</span><div class="tn home">Costa de Marfil</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇪🇨</span><div class="tn away">Ecuador</div></div></div>
   <div class="pr">
     <a id="rb_25_1" href="javascript:void(0)" onclick="SR(25,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_25_3" href="javascript:void(0)" onclick="SR(25,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -304,8 +323,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_30">
-  <div class="mh"><span class="mn">P31 · Grupo F</span><span id="rl_30" class="rl"></span><span id="ck_30"></span></div>
-  <div class="mt"><div class="tn home">Países Bajos</div><div class="vs">VS</div><div class="tn away">Japón</div></div>
+  <div class="mh"><span class="mn">P31 · Grupo F</span><span class="mtime">🕐 17:00</span><span id="rl_30" class="rl"></span><span id="ck_30"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇳🇱</span><div class="tn home">Países Bajos</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇯🇵</span><div class="tn away">Japón</div></div></div>
   <div class="pr">
     <a id="rb_30_1" href="javascript:void(0)" onclick="SR(30,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_30_3" href="javascript:void(0)" onclick="SR(30,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -313,8 +332,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_31">
-  <div class="mh"><span class="mn">P32 · Grupo F</span><span id="rl_31" class="rl"></span><span id="ck_31"></span></div>
-  <div class="mt"><div class="tn home">Suecia</div><div class="vs">VS</div><div class="tn away">Túnez</div></div>
+  <div class="mh"><span class="mn">P32 · Grupo F</span><span class="mtime">🕐 23:00</span><span id="rl_31" class="rl"></span><span id="ck_31"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇸🇪</span><div class="tn home">Suecia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇹🇳</span><div class="tn away">Túnez</div></div></div>
   <div class="pr">
     <a id="rb_31_1" href="javascript:void(0)" onclick="SR(31,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_31_3" href="javascript:void(0)" onclick="SR(31,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -325,8 +344,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 15-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_36">
-  <div class="mh"><span class="mn">P37 · Grupo G</span><span id="rl_36" class="rl"></span><span id="ck_36"></span></div>
-  <div class="mt"><div class="tn home">Bélgica</div><div class="vs">VS</div><div class="tn away">Egipto</div></div>
+  <div class="mh"><span class="mn">P37 · Grupo G</span><span class="mtime">🕐 16:00</span><span id="rl_36" class="rl"></span><span id="ck_36"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇧🇪</span><div class="tn home">Bélgica</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇪🇬</span><div class="tn away">Egipto</div></div></div>
   <div class="pr">
     <a id="rb_36_1" href="javascript:void(0)" onclick="SR(36,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_36_3" href="javascript:void(0)" onclick="SR(36,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -334,8 +353,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_37">
-  <div class="mh"><span class="mn">P38 · Grupo G</span><span id="rl_37" class="rl"></span><span id="ck_37"></span></div>
-  <div class="mt"><div class="tn home">Irán</div><div class="vs">VS</div><div class="tn away">Nueva Zelanda</div></div>
+  <div class="mh"><span class="mn">P38 · Grupo G</span><span class="mtime">🕐 22:00</span><span id="rl_37" class="rl"></span><span id="ck_37"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇮🇷</span><div class="tn home">Irán</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇳🇿</span><div class="tn away">Nueva Zelanda</div></div></div>
   <div class="pr">
     <a id="rb_37_1" href="javascript:void(0)" onclick="SR(37,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_37_3" href="javascript:void(0)" onclick="SR(37,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -343,8 +362,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_42">
-  <div class="mh"><span class="mn">P43 · Grupo H</span><span id="rl_42" class="rl"></span><span id="ck_42"></span></div>
-  <div class="mt"><div class="tn home">España</div><div class="vs">VS</div><div class="tn away">Cabo Verde</div></div>
+  <div class="mh"><span class="mn">P43 · Grupo H</span><span class="mtime">🕐 13:00</span><span id="rl_42" class="rl"></span><span id="ck_42"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇪🇸</span><div class="tn home">España</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇻</span><div class="tn away">Cabo Verde</div></div></div>
   <div class="pr">
     <a id="rb_42_1" href="javascript:void(0)" onclick="SR(42,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_42_3" href="javascript:void(0)" onclick="SR(42,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -355,8 +374,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 16-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_43">
-  <div class="mh"><span class="mn">P44 · Grupo H</span><span id="rl_43" class="rl">X-Empate</span><span id="ck_43"></span></div>
-  <div class="mt"><div class="tn home">Arabia Saudita</div><div class="vs">VS</div><div class="tn away">Uruguay</div></div>
+  <div class="mh"><span class="mn">P44 · Grupo H</span><span class="mtime">🕐 19:00</span><span id="rl_43" class="rl">X-Empate</span><span id="ck_43"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇸🇦</span><div class="tn home">Arabia Saudita</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇺🇾</span><div class="tn away">Uruguay</div></div></div>
   <div class="pr">
     <a id="rb_43_1" href="javascript:void(0)" onclick="SR(43,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_43_3" href="javascript:void(0)" onclick="SR(43,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -364,8 +383,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_48">
-  <div class="mh"><span class="mn">P49 · Grupo I</span><span id="rl_48" class="rl"></span><span id="ck_48"></span></div>
-  <div class="mt"><div class="tn home">Francia</div><div class="vs">VS</div><div class="tn away">Senegal</div></div>
+  <div class="mh"><span class="mn">P49 · Grupo I</span><span class="mtime">🕐 16:00</span><span id="rl_48" class="rl"></span><span id="ck_48"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇫🇷</span><div class="tn home">Francia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇸🇳</span><div class="tn away">Senegal</div></div></div>
   <div class="pr">
     <a id="rb_48_1" href="javascript:void(0)" onclick="SR(48,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_48_3" href="javascript:void(0)" onclick="SR(48,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -373,8 +392,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_49">
-  <div class="mh"><span class="mn">P50 · Grupo I</span><span id="rl_49" class="rl"></span><span id="ck_49"></span></div>
-  <div class="mt"><div class="tn home">Irak</div><div class="vs">VS</div><div class="tn away">Noruega</div></div>
+  <div class="mh"><span class="mn">P50 · Grupo I</span><span class="mtime">🕐 19:00</span><span id="rl_49" class="rl"></span><span id="ck_49"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇮🇶</span><div class="tn home">Irak</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇳🇴</span><div class="tn away">Noruega</div></div></div>
   <div class="pr">
     <a id="rb_49_1" href="javascript:void(0)" onclick="SR(49,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_49_3" href="javascript:void(0)" onclick="SR(49,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -382,8 +401,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_54">
-  <div class="mh"><span class="mn">P55 · Grupo J</span><span id="rl_54" class="rl"></span><span id="ck_54"></span></div>
-  <div class="mt"><div class="tn home">Argentina</div><div class="vs">VS</div><div class="tn away">Argelia</div></div>
+  <div class="mh"><span class="mn">P55 · Grupo J</span><span class="mtime">🕐 22:00</span><span id="rl_54" class="rl"></span><span id="ck_54"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇦🇷</span><div class="tn home">Argentina</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇩🇿</span><div class="tn away">Argelia</div></div></div>
   <div class="pr">
     <a id="rb_54_1" href="javascript:void(0)" onclick="SR(54,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_54_3" href="javascript:void(0)" onclick="SR(54,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -391,8 +410,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_55">
-  <div class="mh"><span class="mn">P56 · Grupo J</span><span id="rl_55" class="rl"></span><span id="ck_55"></span></div>
-  <div class="mt"><div class="tn home">Austria</div><div class="vs">VS</div><div class="tn away">Jordania</div></div>
+  <div class="mh"><span class="mn">P56 · Grupo J</span><span class="mtime">🕐 01:00</span><span id="rl_55" class="rl"></span><span id="ck_55"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇦🇹</span><div class="tn home">Austria</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇯🇴</span><div class="tn away">Jordania</div></div></div>
   <div class="pr">
     <a id="rb_55_1" href="javascript:void(0)" onclick="SR(55,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_55_3" href="javascript:void(0)" onclick="SR(55,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -403,8 +422,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 17-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_60">
-  <div class="mh"><span class="mn">P61 · Grupo K</span><span id="rl_60" class="rl"></span><span id="ck_60"></span></div>
-  <div class="mt"><div class="tn home">Portugal</div><div class="vs">VS</div><div class="tn away">R.D. Congo</div></div>
+  <div class="mh"><span class="mn">P61 · Grupo K</span><span class="mtime">🕐 14:00</span><span id="rl_60" class="rl"></span><span id="ck_60"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇵🇹</span><div class="tn home">Portugal</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇩</span><div class="tn away">R.D. Congo</div></div></div>
   <div class="pr">
     <a id="rb_60_1" href="javascript:void(0)" onclick="SR(60,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_60_3" href="javascript:void(0)" onclick="SR(60,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -412,8 +431,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_61">
-  <div class="mh"><span class="mn">P62 · Grupo K</span><span id="rl_61" class="rl"></span><span id="ck_61"></span></div>
-  <div class="mt"><div class="tn home">Uzbekistán</div><div class="vs">VS</div><div class="tn away">Colombia</div></div>
+  <div class="mh"><span class="mn">P62 · Grupo K</span><span class="mtime">🕐 23:00</span><span id="rl_61" class="rl"></span><span id="ck_61"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇺🇿</span><div class="tn home">Uzbekistán</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇴</span><div class="tn away">Colombia</div></div></div>
   <div class="pr">
     <a id="rb_61_1" href="javascript:void(0)" onclick="SR(61,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_61_3" href="javascript:void(0)" onclick="SR(61,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -421,8 +440,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_66">
-  <div class="mh"><span class="mn">P67 · Grupo L</span><span id="rl_66" class="rl"></span><span id="ck_66"></span></div>
-  <div class="mt"><div class="tn home">Inglaterra</div><div class="vs">VS</div><div class="tn away">Croacia</div></div>
+  <div class="mh"><span class="mn">P67 · Grupo L</span><span class="mtime">🕐 17:00</span><span id="rl_66" class="rl"></span><span id="ck_66"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🏴</span><div class="tn home">Inglaterra</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇭🇷</span><div class="tn away">Croacia</div></div></div>
   <div class="pr">
     <a id="rb_66_1" href="javascript:void(0)" onclick="SR(66,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_66_3" href="javascript:void(0)" onclick="SR(66,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -430,8 +449,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_67">
-  <div class="mh"><span class="mn">P68 · Grupo L</span><span id="rl_67" class="rl"></span><span id="ck_67"></span></div>
-  <div class="mt"><div class="tn home">Ghana</div><div class="vs">VS</div><div class="tn away">Panamá</div></div>
+  <div class="mh"><span class="mn">P68 · Grupo L</span><span class="mtime">🕐 20:00</span><span id="rl_67" class="rl"></span><span id="ck_67"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇬🇭</span><div class="tn home">Ghana</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇵🇦</span><div class="tn away">Panamá</div></div></div>
   <div class="pr">
     <a id="rb_67_1" href="javascript:void(0)" onclick="SR(67,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_67_3" href="javascript:void(0)" onclick="SR(67,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -442,8 +461,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 18-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_2">
-  <div class="mh"><span class="mn">P3 · Grupo A</span><span id="rl_2" class="rl"></span><span id="ck_2"></span></div>
-  <div class="mt"><div class="tn home">Rep. Checa</div><div class="vs">VS</div><div class="tn away">Sudáfrica</div></div>
+  <div class="mh"><span class="mn">P3 · Grupo A</span><span class="mtime">🕐 13:00</span><span id="rl_2" class="rl"></span><span id="ck_2"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇿</span><div class="tn home">Rep. Checa</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇿🇦</span><div class="tn away">Sudáfrica</div></div></div>
   <div class="pr">
     <a id="rb_2_1" href="javascript:void(0)" onclick="SR(2,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_2_3" href="javascript:void(0)" onclick="SR(2,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -451,8 +470,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_3">
-  <div class="mh"><span class="mn">P4 · Grupo A</span><span id="rl_3" class="rl"></span><span id="ck_3"></span></div>
-  <div class="mt"><div class="tn home">México</div><div class="vs">VS</div><div class="tn away">Corea del Sur</div></div>
+  <div class="mh"><span class="mn">P4 · Grupo A</span><span class="mtime">🕐 22:00</span><span id="rl_3" class="rl"></span><span id="ck_3"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇲🇽</span><div class="tn home">México</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇰🇷</span><div class="tn away">Corea del Sur</div></div></div>
   <div class="pr">
     <a id="rb_3_1" href="javascript:void(0)" onclick="SR(3,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_3_3" href="javascript:void(0)" onclick="SR(3,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -460,8 +479,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_8">
-  <div class="mh"><span class="mn">P9 · Grupo B</span><span id="rl_8" class="rl"></span><span id="ck_8"></span></div>
-  <div class="mt"><div class="tn home">Suiza</div><div class="vs">VS</div><div class="tn away">Bosnia-Herz.</div></div>
+  <div class="mh"><span class="mn">P9 · Grupo B</span><span class="mtime">🕐 16:00</span><span id="rl_8" class="rl"></span><span id="ck_8"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇭</span><div class="tn home">Suiza</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇧🇦</span><div class="tn away">Bosnia-Herz.</div></div></div>
   <div class="pr">
     <a id="rb_8_1" href="javascript:void(0)" onclick="SR(8,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_8_3" href="javascript:void(0)" onclick="SR(8,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -469,8 +488,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_9">
-  <div class="mh"><span class="mn">P10 · Grupo B</span><span id="rl_9" class="rl"></span><span id="ck_9"></span></div>
-  <div class="mt"><div class="tn home">Canadá</div><div class="vs">VS</div><div class="tn away">Qatar</div></div>
+  <div class="mh"><span class="mn">P10 · Grupo B</span><span class="mtime">🕐 19:00</span><span id="rl_9" class="rl"></span><span id="ck_9"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇦</span><div class="tn home">Canadá</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇶🇦</span><div class="tn away">Qatar</div></div></div>
   <div class="pr">
     <a id="rb_9_1" href="javascript:void(0)" onclick="SR(9,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_9_3" href="javascript:void(0)" onclick="SR(9,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -481,8 +500,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 19-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_14">
-  <div class="mh"><span class="mn">P15 · Grupo C</span><span id="rl_14" class="rl"></span><span id="ck_14"></span></div>
-  <div class="mt"><div class="tn home">Escocia</div><div class="vs">VS</div><div class="tn away">Marruecos</div></div>
+  <div class="mh"><span class="mn">P15 · Grupo C</span><span class="mtime">🕐 19:00</span><span id="rl_14" class="rl"></span><span id="ck_14"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🏴</span><div class="tn home">Escocia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇲🇦</span><div class="tn away">Marruecos</div></div></div>
   <div class="pr">
     <a id="rb_14_1" href="javascript:void(0)" onclick="SR(14,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_14_3" href="javascript:void(0)" onclick="SR(14,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -490,8 +509,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_15">
-  <div class="mh"><span class="mn">P16 · Grupo C</span><span id="rl_15" class="rl"></span><span id="ck_15"></span></div>
-  <div class="mt"><div class="tn home">Brasil</div><div class="vs">VS</div><div class="tn away">Haití</div></div>
+  <div class="mh"><span class="mn">P16 · Grupo C</span><span class="mtime">🕐 21:30</span><span id="rl_15" class="rl"></span><span id="ck_15"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇧🇷</span><div class="tn home">Brasil</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇭🇹</span><div class="tn away">Haití</div></div></div>
   <div class="pr">
     <a id="rb_15_1" href="javascript:void(0)" onclick="SR(15,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_15_3" href="javascript:void(0)" onclick="SR(15,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -499,8 +518,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_20">
-  <div class="mh"><span class="mn">P21 · Grupo D</span><span id="rl_20" class="rl"></span><span id="ck_20"></span></div>
-  <div class="mt"><div class="tn home">Turquía</div><div class="vs">VS</div><div class="tn away">Paraguay</div></div>
+  <div class="mh"><span class="mn">P21 · Grupo D</span><span class="mtime">🕐 00:00</span><span id="rl_20" class="rl"></span><span id="ck_20"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇹🇷</span><div class="tn home">Turquía</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇵🇾</span><div class="tn away">Paraguay</div></div></div>
   <div class="pr">
     <a id="rb_20_1" href="javascript:void(0)" onclick="SR(20,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_20_3" href="javascript:void(0)" onclick="SR(20,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -508,8 +527,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_21">
-  <div class="mh"><span class="mn">P22 · Grupo D</span><span id="rl_21" class="rl"></span><span id="ck_21"></span></div>
-  <div class="mt"><div class="tn home">Estados Unidos</div><div class="vs">VS</div><div class="tn away">Australia</div></div>
+  <div class="mh"><span class="mn">P22 · Grupo D</span><span class="mtime">🕐 16:00</span><span id="rl_21" class="rl"></span><span id="ck_21"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇺🇸</span><div class="tn home">Estados Unidos</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇦🇺</span><div class="tn away">Australia</div></div></div>
   <div class="pr">
     <a id="rb_21_1" href="javascript:void(0)" onclick="SR(21,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_21_3" href="javascript:void(0)" onclick="SR(21,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -520,8 +539,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 20-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_26">
-  <div class="mh"><span class="mn">P27 · Grupo E</span><span id="rl_26" class="rl"></span><span id="ck_26"></span></div>
-  <div class="mt"><div class="tn home">Alemania</div><div class="vs">VS</div><div class="tn away">Costa de Marfil</div></div>
+  <div class="mh"><span class="mn">P27 · Grupo E</span><span class="mtime">🕐 17:00</span><span id="rl_26" class="rl"></span><span id="ck_26"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇩🇪</span><div class="tn home">Alemania</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇮</span><div class="tn away">Costa de Marfil</div></div></div>
   <div class="pr">
     <a id="rb_26_1" href="javascript:void(0)" onclick="SR(26,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_26_3" href="javascript:void(0)" onclick="SR(26,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -529,8 +548,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_27">
-  <div class="mh"><span class="mn">P28 · Grupo E</span><span id="rl_27" class="rl"></span><span id="ck_27"></span></div>
-  <div class="mt"><div class="tn home">Curazao</div><div class="vs">VS</div><div class="tn away">Ecuador</div></div>
+  <div class="mh"><span class="mn">P28 · Grupo E</span><span class="mtime">🕐 21:00</span><span id="rl_27" class="rl"></span><span id="ck_27"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇼</span><div class="tn home">Curazao</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇪🇨</span><div class="tn away">Ecuador</div></div></div>
   <div class="pr">
     <a id="rb_27_1" href="javascript:void(0)" onclick="SR(27,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_27_3" href="javascript:void(0)" onclick="SR(27,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -538,8 +557,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_32">
-  <div class="mh"><span class="mn">P33 · Grupo F</span><span id="rl_32" class="rl"></span><span id="ck_32"></span></div>
-  <div class="mt"><div class="tn home">Países Bajos</div><div class="vs">VS</div><div class="tn away">Suecia</div></div>
+  <div class="mh"><span class="mn">P33 · Grupo F</span><span class="mtime">🕐 14:00</span><span id="rl_32" class="rl"></span><span id="ck_32"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇳🇱</span><div class="tn home">Países Bajos</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇸🇪</span><div class="tn away">Suecia</div></div></div>
   <div class="pr">
     <a id="rb_32_1" href="javascript:void(0)" onclick="SR(32,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_32_3" href="javascript:void(0)" onclick="SR(32,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -547,8 +566,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_33">
-  <div class="mh"><span class="mn">P34 · Grupo F</span><span id="rl_33" class="rl"></span><span id="ck_33"></span></div>
-  <div class="mt"><div class="tn home">Túnez</div><div class="vs">VS</div><div class="tn away">Japón</div></div>
+  <div class="mh"><span class="mn">P34 · Grupo F</span><span class="mtime">🕐 01:00</span><span id="rl_33" class="rl"></span><span id="ck_33"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇹🇳</span><div class="tn home">Túnez</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇯🇵</span><div class="tn away">Japón</div></div></div>
   <div class="pr">
     <a id="rb_33_1" href="javascript:void(0)" onclick="SR(33,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_33_3" href="javascript:void(0)" onclick="SR(33,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -559,8 +578,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 21-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_38">
-  <div class="mh"><span class="mn">P39 · Grupo G</span><span id="rl_38" class="rl"></span><span id="ck_38"></span></div>
-  <div class="mt"><div class="tn home">Bélgica</div><div class="vs">VS</div><div class="tn away">Irán</div></div>
+  <div class="mh"><span class="mn">P39 · Grupo G</span><span class="mtime">🕐 16:00</span><span id="rl_38" class="rl"></span><span id="ck_38"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇧🇪</span><div class="tn home">Bélgica</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇮🇷</span><div class="tn away">Irán</div></div></div>
   <div class="pr">
     <a id="rb_38_1" href="javascript:void(0)" onclick="SR(38,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_38_3" href="javascript:void(0)" onclick="SR(38,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -568,8 +587,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_39">
-  <div class="mh"><span class="mn">P40 · Grupo G</span><span id="rl_39" class="rl"></span><span id="ck_39"></span></div>
-  <div class="mt"><div class="tn home">Nueva Zelanda</div><div class="vs">VS</div><div class="tn away">Egipto</div></div>
+  <div class="mh"><span class="mn">P40 · Grupo G</span><span class="mtime">🕐 22:00</span><span id="rl_39" class="rl"></span><span id="ck_39"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇳🇿</span><div class="tn home">Nueva Zelanda</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇪🇬</span><div class="tn away">Egipto</div></div></div>
   <div class="pr">
     <a id="rb_39_1" href="javascript:void(0)" onclick="SR(39,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_39_3" href="javascript:void(0)" onclick="SR(39,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -577,8 +596,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_44">
-  <div class="mh"><span class="mn">P45 · Grupo H</span><span id="rl_44" class="rl"></span><span id="ck_44"></span></div>
-  <div class="mt"><div class="tn home">España</div><div class="vs">VS</div><div class="tn away">Arabia Saudita</div></div>
+  <div class="mh"><span class="mn">P45 · Grupo H</span><span class="mtime">🕐 13:00</span><span id="rl_44" class="rl"></span><span id="ck_44"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇪🇸</span><div class="tn home">España</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇸🇦</span><div class="tn away">Arabia Saudita</div></div></div>
   <div class="pr">
     <a id="rb_44_1" href="javascript:void(0)" onclick="SR(44,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_44_3" href="javascript:void(0)" onclick="SR(44,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -586,8 +605,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_45">
-  <div class="mh"><span class="mn">P46 · Grupo H</span><span id="rl_45" class="rl"></span><span id="ck_45"></span></div>
-  <div class="mt"><div class="tn home">Uruguay</div><div class="vs">VS</div><div class="tn away">Cabo Verde</div></div>
+  <div class="mh"><span class="mn">P46 · Grupo H</span><span class="mtime">🕐 19:00</span><span id="rl_45" class="rl"></span><span id="ck_45"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇺🇾</span><div class="tn home">Uruguay</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇻</span><div class="tn away">Cabo Verde</div></div></div>
   <div class="pr">
     <a id="rb_45_1" href="javascript:void(0)" onclick="SR(45,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_45_3" href="javascript:void(0)" onclick="SR(45,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -598,8 +617,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 22-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_50">
-  <div class="mh"><span class="mn">P51 · Grupo I</span><span id="rl_50" class="rl"></span><span id="ck_50"></span></div>
-  <div class="mt"><div class="tn home">Francia</div><div class="vs">VS</div><div class="tn away">Irak</div></div>
+  <div class="mh"><span class="mn">P51 · Grupo I</span><span class="mtime">🕐 18:00</span><span id="rl_50" class="rl"></span><span id="ck_50"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇫🇷</span><div class="tn home">Francia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇮🇶</span><div class="tn away">Irak</div></div></div>
   <div class="pr">
     <a id="rb_50_1" href="javascript:void(0)" onclick="SR(50,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_50_3" href="javascript:void(0)" onclick="SR(50,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -607,8 +626,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_51">
-  <div class="mh"><span class="mn">P52 · Grupo I</span><span id="rl_51" class="rl"></span><span id="ck_51"></span></div>
-  <div class="mt"><div class="tn home">Noruega</div><div class="vs">VS</div><div class="tn away">Senegal</div></div>
+  <div class="mh"><span class="mn">P52 · Grupo I</span><span class="mtime">🕐 21:00</span><span id="rl_51" class="rl"></span><span id="ck_51"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇳🇴</span><div class="tn home">Noruega</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇸🇳</span><div class="tn away">Senegal</div></div></div>
   <div class="pr">
     <a id="rb_51_1" href="javascript:void(0)" onclick="SR(51,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_51_3" href="javascript:void(0)" onclick="SR(51,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -616,8 +635,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_56">
-  <div class="mh"><span class="mn">P57 · Grupo J</span><span id="rl_56" class="rl"></span><span id="ck_56"></span></div>
-  <div class="mt"><div class="tn home">Argentina</div><div class="vs">VS</div><div class="tn away">Austria</div></div>
+  <div class="mh"><span class="mn">P57 · Grupo J</span><span class="mtime">🕐 14:00</span><span id="rl_56" class="rl"></span><span id="ck_56"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇦🇷</span><div class="tn home">Argentina</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇦🇹</span><div class="tn away">Austria</div></div></div>
   <div class="pr">
     <a id="rb_56_1" href="javascript:void(0)" onclick="SR(56,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_56_3" href="javascript:void(0)" onclick="SR(56,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -625,8 +644,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_57">
-  <div class="mh"><span class="mn">P58 · Grupo J</span><span id="rl_57" class="rl"></span><span id="ck_57"></span></div>
-  <div class="mt"><div class="tn home">Argelia</div><div class="vs">VS</div><div class="tn away">Jordania</div></div>
+  <div class="mh"><span class="mn">P58 · Grupo J</span><span class="mtime">🕐 00:00</span><span id="rl_57" class="rl"></span><span id="ck_57"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇩🇿</span><div class="tn home">Argelia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇯🇴</span><div class="tn away">Jordania</div></div></div>
   <div class="pr">
     <a id="rb_57_1" href="javascript:void(0)" onclick="SR(57,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_57_3" href="javascript:void(0)" onclick="SR(57,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -637,8 +656,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 23-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_62">
-  <div class="mh"><span class="mn">P63 · Grupo K</span><span id="rl_62" class="rl"></span><span id="ck_62"></span></div>
-  <div class="mt"><div class="tn home">Portugal</div><div class="vs">VS</div><div class="tn away">Uzbekistán</div></div>
+  <div class="mh"><span class="mn">P63 · Grupo K</span><span class="mtime">🕐 14:00</span><span id="rl_62" class="rl"></span><span id="ck_62"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇵🇹</span><div class="tn home">Portugal</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇺🇿</span><div class="tn away">Uzbekistán</div></div></div>
   <div class="pr">
     <a id="rb_62_1" href="javascript:void(0)" onclick="SR(62,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_62_3" href="javascript:void(0)" onclick="SR(62,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -646,8 +665,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_63">
-  <div class="mh"><span class="mn">P64 · Grupo K</span><span id="rl_63" class="rl"></span><span id="ck_63"></span></div>
-  <div class="mt"><div class="tn home">R.D. Congo</div><div class="vs">VS</div><div class="tn away">Colombia</div></div>
+  <div class="mh"><span class="mn">P64 · Grupo K</span><span class="mtime">🕐 23:00</span><span id="rl_63" class="rl"></span><span id="ck_63"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇩</span><div class="tn home">R.D. Congo</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇴</span><div class="tn away">Colombia</div></div></div>
   <div class="pr">
     <a id="rb_63_1" href="javascript:void(0)" onclick="SR(63,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_63_3" href="javascript:void(0)" onclick="SR(63,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -655,8 +674,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_68">
-  <div class="mh"><span class="mn">P69 · Grupo L</span><span id="rl_68" class="rl"></span><span id="ck_68"></span></div>
-  <div class="mt"><div class="tn home">Inglaterra</div><div class="vs">VS</div><div class="tn away">Ghana</div></div>
+  <div class="mh"><span class="mn">P69 · Grupo L</span><span class="mtime">🕐 17:00</span><span id="rl_68" class="rl"></span><span id="ck_68"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🏴</span><div class="tn home">Inglaterra</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇬🇭</span><div class="tn away">Ghana</div></div></div>
   <div class="pr">
     <a id="rb_68_1" href="javascript:void(0)" onclick="SR(68,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_68_3" href="javascript:void(0)" onclick="SR(68,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -664,8 +683,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_69">
-  <div class="mh"><span class="mn">P70 · Grupo L</span><span id="rl_69" class="rl"></span><span id="ck_69"></span></div>
-  <div class="mt"><div class="tn home">Croacia</div><div class="vs">VS</div><div class="tn away">Panamá</div></div>
+  <div class="mh"><span class="mn">P70 · Grupo L</span><span class="mtime">🕐 20:00</span><span id="rl_69" class="rl"></span><span id="ck_69"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇭🇷</span><div class="tn home">Croacia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇵🇦</span><div class="tn away">Panamá</div></div></div>
   <div class="pr">
     <a id="rb_69_1" href="javascript:void(0)" onclick="SR(69,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_69_3" href="javascript:void(0)" onclick="SR(69,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -676,8 +695,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 24-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_4">
-  <div class="mh"><span class="mn">P5 · Grupo A</span><span id="rl_4" class="rl"></span><span id="ck_4"></span></div>
-  <div class="mt"><div class="tn home">Rep. Checa</div><div class="vs">VS</div><div class="tn away">México</div></div>
+  <div class="mh"><span class="mn">P5 · Grupo A</span><span class="mtime">🕐 22:00</span><span id="rl_4" class="rl"></span><span id="ck_4"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇿</span><div class="tn home">Rep. Checa</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇲🇽</span><div class="tn away">México</div></div></div>
   <div class="pr">
     <a id="rb_4_1" href="javascript:void(0)" onclick="SR(4,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_4_3" href="javascript:void(0)" onclick="SR(4,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -685,8 +704,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_5">
-  <div class="mh"><span class="mn">P6 · Grupo A</span><span id="rl_5" class="rl"></span><span id="ck_5"></span></div>
-  <div class="mt"><div class="tn home">Sudáfrica</div><div class="vs">VS</div><div class="tn away">Corea del Sur</div></div>
+  <div class="mh"><span class="mn">P6 · Grupo A</span><span class="mtime">🕐 22:00</span><span id="rl_5" class="rl"></span><span id="ck_5"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇿🇦</span><div class="tn home">Sudáfrica</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇰🇷</span><div class="tn away">Corea del Sur</div></div></div>
   <div class="pr">
     <a id="rb_5_1" href="javascript:void(0)" onclick="SR(5,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_5_3" href="javascript:void(0)" onclick="SR(5,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -694,8 +713,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_10">
-  <div class="mh"><span class="mn">P11 · Grupo B</span><span id="rl_10" class="rl"></span><span id="ck_10"></span></div>
-  <div class="mt"><div class="tn home">Suiza</div><div class="vs">VS</div><div class="tn away">Canadá</div></div>
+  <div class="mh"><span class="mn">P11 · Grupo B</span><span class="mtime">🕐 16:00</span><span id="rl_10" class="rl"></span><span id="ck_10"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇭</span><div class="tn home">Suiza</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇦</span><div class="tn away">Canadá</div></div></div>
   <div class="pr">
     <a id="rb_10_1" href="javascript:void(0)" onclick="SR(10,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_10_3" href="javascript:void(0)" onclick="SR(10,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -703,8 +722,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_11">
-  <div class="mh"><span class="mn">P12 · Grupo B</span><span id="rl_11" class="rl"></span><span id="ck_11"></span></div>
-  <div class="mt"><div class="tn home">Bosnia-Herz.</div><div class="vs">VS</div><div class="tn away">Qatar</div></div>
+  <div class="mh"><span class="mn">P12 · Grupo B</span><span class="mtime">🕐 16:00</span><span id="rl_11" class="rl"></span><span id="ck_11"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇧🇦</span><div class="tn home">Bosnia-Herz.</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇶🇦</span><div class="tn away">Qatar</div></div></div>
   <div class="pr">
     <a id="rb_11_1" href="javascript:void(0)" onclick="SR(11,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_11_3" href="javascript:void(0)" onclick="SR(11,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -712,8 +731,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_16">
-  <div class="mh"><span class="mn">P17 · Grupo C</span><span id="rl_16" class="rl"></span><span id="ck_16"></span></div>
-  <div class="mt"><div class="tn home">Escocia</div><div class="vs">VS</div><div class="tn away">Brasil</div></div>
+  <div class="mh"><span class="mn">P17 · Grupo C</span><span class="mtime">🕐 19:00</span><span id="rl_16" class="rl"></span><span id="ck_16"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🏴</span><div class="tn home">Escocia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇧🇷</span><div class="tn away">Brasil</div></div></div>
   <div class="pr">
     <a id="rb_16_1" href="javascript:void(0)" onclick="SR(16,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_16_3" href="javascript:void(0)" onclick="SR(16,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -721,8 +740,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_17">
-  <div class="mh"><span class="mn">P18 · Grupo C</span><span id="rl_17" class="rl"></span><span id="ck_17"></span></div>
-  <div class="mt"><div class="tn home">Marruecos</div><div class="vs">VS</div><div class="tn away">Haití</div></div>
+  <div class="mh"><span class="mn">P18 · Grupo C</span><span class="mtime">🕐 19:00</span><span id="rl_17" class="rl"></span><span id="ck_17"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇲🇦</span><div class="tn home">Marruecos</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇭🇹</span><div class="tn away">Haití</div></div></div>
   <div class="pr">
     <a id="rb_17_1" href="javascript:void(0)" onclick="SR(17,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_17_3" href="javascript:void(0)" onclick="SR(17,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -733,8 +752,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 25-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_22">
-  <div class="mh"><span class="mn">P23 · Grupo D</span><span id="rl_22" class="rl"></span><span id="ck_22"></span></div>
-  <div class="mt"><div class="tn home">Turquía</div><div class="vs">VS</div><div class="tn away">Estados Unidos</div></div>
+  <div class="mh"><span class="mn">P23 · Grupo D</span><span class="mtime">🕐 23:00</span><span id="rl_22" class="rl"></span><span id="ck_22"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇹🇷</span><div class="tn home">Turquía</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇺🇸</span><div class="tn away">Estados Unidos</div></div></div>
   <div class="pr">
     <a id="rb_22_1" href="javascript:void(0)" onclick="SR(22,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_22_3" href="javascript:void(0)" onclick="SR(22,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -742,8 +761,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_23">
-  <div class="mh"><span class="mn">P24 · Grupo D</span><span id="rl_23" class="rl"></span><span id="ck_23"></span></div>
-  <div class="mt"><div class="tn home">Paraguay</div><div class="vs">VS</div><div class="tn away">Australia</div></div>
+  <div class="mh"><span class="mn">P24 · Grupo D</span><span class="mtime">🕐 23:00</span><span id="rl_23" class="rl"></span><span id="ck_23"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇵🇾</span><div class="tn home">Paraguay</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇦🇺</span><div class="tn away">Australia</div></div></div>
   <div class="pr">
     <a id="rb_23_1" href="javascript:void(0)" onclick="SR(23,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_23_3" href="javascript:void(0)" onclick="SR(23,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -751,8 +770,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_28">
-  <div class="mh"><span class="mn">P29 · Grupo E</span><span id="rl_28" class="rl"></span><span id="ck_28"></span></div>
-  <div class="mt"><div class="tn home">Ecuador</div><div class="vs">VS</div><div class="tn away">Alemania</div></div>
+  <div class="mh"><span class="mn">P29 · Grupo E</span><span class="mtime">🕐 17:00</span><span id="rl_28" class="rl"></span><span id="ck_28"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇪🇨</span><div class="tn home">Ecuador</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇩🇪</span><div class="tn away">Alemania</div></div></div>
   <div class="pr">
     <a id="rb_28_1" href="javascript:void(0)" onclick="SR(28,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_28_3" href="javascript:void(0)" onclick="SR(28,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -760,8 +779,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_29">
-  <div class="mh"><span class="mn">P30 · Grupo E</span><span id="rl_29" class="rl"></span><span id="ck_29"></span></div>
-  <div class="mt"><div class="tn home">Curazao</div><div class="vs">VS</div><div class="tn away">Costa de Marfil</div></div>
+  <div class="mh"><span class="mn">P30 · Grupo E</span><span class="mtime">🕐 17:00</span><span id="rl_29" class="rl"></span><span id="ck_29"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇼</span><div class="tn home">Curazao</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇨🇮</span><div class="tn away">Costa de Marfil</div></div></div>
   <div class="pr">
     <a id="rb_29_1" href="javascript:void(0)" onclick="SR(29,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_29_3" href="javascript:void(0)" onclick="SR(29,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -769,8 +788,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_34">
-  <div class="mh"><span class="mn">P35 · Grupo F</span><span id="rl_34" class="rl"></span><span id="ck_34"></span></div>
-  <div class="mt"><div class="tn home">Japón</div><div class="vs">VS</div><div class="tn away">Suecia</div></div>
+  <div class="mh"><span class="mn">P35 · Grupo F</span><span class="mtime">🕐 20:00</span><span id="rl_34" class="rl"></span><span id="ck_34"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇯🇵</span><div class="tn home">Japón</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇸🇪</span><div class="tn away">Suecia</div></div></div>
   <div class="pr">
     <a id="rb_34_1" href="javascript:void(0)" onclick="SR(34,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_34_3" href="javascript:void(0)" onclick="SR(34,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -778,8 +797,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_35">
-  <div class="mh"><span class="mn">P36 · Grupo F</span><span id="rl_35" class="rl"></span><span id="ck_35"></span></div>
-  <div class="mt"><div class="tn home">Túnez</div><div class="vs">VS</div><div class="tn away">Países Bajos</div></div>
+  <div class="mh"><span class="mn">P36 · Grupo F</span><span class="mtime">🕐 20:00</span><span id="rl_35" class="rl"></span><span id="ck_35"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇹🇳</span><div class="tn home">Túnez</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇳🇱</span><div class="tn away">Países Bajos</div></div></div>
   <div class="pr">
     <a id="rb_35_1" href="javascript:void(0)" onclick="SR(35,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_35_3" href="javascript:void(0)" onclick="SR(35,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -790,8 +809,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 26-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_40">
-  <div class="mh"><span class="mn">P41 · Grupo G</span><span id="rl_40" class="rl"></span><span id="ck_40"></span></div>
-  <div class="mt"><div class="tn home">Nueva Zelanda</div><div class="vs">VS</div><div class="tn away">Bélgica</div></div>
+  <div class="mh"><span class="mn">P41 · Grupo G</span><span class="mtime">🕐 00:00</span><span id="rl_40" class="rl"></span><span id="ck_40"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇳🇿</span><div class="tn home">Nueva Zelanda</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇧🇪</span><div class="tn away">Bélgica</div></div></div>
   <div class="pr">
     <a id="rb_40_1" href="javascript:void(0)" onclick="SR(40,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_40_3" href="javascript:void(0)" onclick="SR(40,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -799,8 +818,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_41">
-  <div class="mh"><span class="mn">P42 · Grupo G</span><span id="rl_41" class="rl"></span><span id="ck_41"></span></div>
-  <div class="mt"><div class="tn home">Egipto</div><div class="vs">VS</div><div class="tn away">Irán</div></div>
+  <div class="mh"><span class="mn">P42 · Grupo G</span><span class="mtime">🕐 00:00</span><span id="rl_41" class="rl"></span><span id="ck_41"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇪🇬</span><div class="tn home">Egipto</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇮🇷</span><div class="tn away">Irán</div></div></div>
   <div class="pr">
     <a id="rb_41_1" href="javascript:void(0)" onclick="SR(41,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_41_3" href="javascript:void(0)" onclick="SR(41,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -808,8 +827,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_46">
-  <div class="mh"><span class="mn">P47 · Grupo H</span><span id="rl_46" class="rl"></span><span id="ck_46"></span></div>
-  <div class="mt"><div class="tn home">Uruguay</div><div class="vs">VS</div><div class="tn away">España</div></div>
+  <div class="mh"><span class="mn">P47 · Grupo H</span><span class="mtime">🕐 21:00</span><span id="rl_46" class="rl"></span><span id="ck_46"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇺🇾</span><div class="tn home">Uruguay</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇪🇸</span><div class="tn away">España</div></div></div>
   <div class="pr">
     <a id="rb_46_1" href="javascript:void(0)" onclick="SR(46,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_46_3" href="javascript:void(0)" onclick="SR(46,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -817,8 +836,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_47">
-  <div class="mh"><span class="mn">P48 · Grupo H</span><span id="rl_47" class="rl"></span><span id="ck_47"></span></div>
-  <div class="mt"><div class="tn home">Cabo Verde</div><div class="vs">VS</div><div class="tn away">Arabia Saudita</div></div>
+  <div class="mh"><span class="mn">P48 · Grupo H</span><span class="mtime">🕐 21:00</span><span id="rl_47" class="rl"></span><span id="ck_47"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇻</span><div class="tn home">Cabo Verde</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇸🇦</span><div class="tn away">Arabia Saudita</div></div></div>
   <div class="pr">
     <a id="rb_47_1" href="javascript:void(0)" onclick="SR(47,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_47_3" href="javascript:void(0)" onclick="SR(47,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -826,8 +845,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_52">
-  <div class="mh"><span class="mn">P53 · Grupo I</span><span id="rl_52" class="rl"></span><span id="ck_52"></span></div>
-  <div class="mt"><div class="tn home">Noruega</div><div class="vs">VS</div><div class="tn away">Francia</div></div>
+  <div class="mh"><span class="mn">P53 · Grupo I</span><span class="mtime">🕐 16:00</span><span id="rl_52" class="rl"></span><span id="ck_52"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇳🇴</span><div class="tn home">Noruega</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇫🇷</span><div class="tn away">Francia</div></div></div>
   <div class="pr">
     <a id="rb_52_1" href="javascript:void(0)" onclick="SR(52,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_52_3" href="javascript:void(0)" onclick="SR(52,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -835,8 +854,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_53">
-  <div class="mh"><span class="mn">P54 · Grupo I</span><span id="rl_53" class="rl"></span><span id="ck_53"></span></div>
-  <div class="mt"><div class="tn home">Senegal</div><div class="vs">VS</div><div class="tn away">Irak</div></div>
+  <div class="mh"><span class="mn">P54 · Grupo I</span><span class="mtime">🕐 16:00</span><span id="rl_53" class="rl"></span><span id="ck_53"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇸🇳</span><div class="tn home">Senegal</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇮🇶</span><div class="tn away">Irak</div></div></div>
   <div class="pr">
     <a id="rb_53_1" href="javascript:void(0)" onclick="SR(53,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_53_3" href="javascript:void(0)" onclick="SR(53,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -844,8 +863,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_58">
-  <div class="mh"><span class="mn">P59 · Grupo J</span><span id="rl_58" class="rl"></span><span id="ck_58"></span></div>
-  <div class="mt"><div class="tn home">Argelia</div><div class="vs">VS</div><div class="tn away">Austria</div></div>
+  <div class="mh"><span class="mn">P59 · Grupo J</span><span class="mtime">🕐 23:00</span><span id="rl_58" class="rl"></span><span id="ck_58"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇩🇿</span><div class="tn home">Argelia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇦🇹</span><div class="tn away">Austria</div></div></div>
   <div class="pr">
     <a id="rb_58_1" href="javascript:void(0)" onclick="SR(58,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_58_3" href="javascript:void(0)" onclick="SR(58,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -853,8 +872,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_59">
-  <div class="mh"><span class="mn">P60 · Grupo J</span><span id="rl_59" class="rl"></span><span id="ck_59"></span></div>
-  <div class="mt"><div class="tn home">Jordania</div><div class="vs">VS</div><div class="tn away">Argentina</div></div>
+  <div class="mh"><span class="mn">P60 · Grupo J</span><span class="mtime">🕐 23:00</span><span id="rl_59" class="rl"></span><span id="ck_59"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇯🇴</span><div class="tn home">Jordania</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇦🇷</span><div class="tn away">Argentina</div></div></div>
   <div class="pr">
     <a id="rb_59_1" href="javascript:void(0)" onclick="SR(59,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_59_3" href="javascript:void(0)" onclick="SR(59,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -865,8 +884,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="dsec">
 <div class="dh"><span class="dlabel">📅 27-Jun</span><div class="dline"></div></div>
 <div class="mc" id="card_64">
-  <div class="mh"><span class="mn">P65 · Grupo K</span><span id="rl_64" class="rl"></span><span id="ck_64"></span></div>
-  <div class="mt"><div class="tn home">Colombia</div><div class="vs">VS</div><div class="tn away">Portugal</div></div>
+  <div class="mh"><span class="mn">P65 · Grupo K</span><span class="mtime">🕐 20:30</span><span id="rl_64" class="rl"></span><span id="ck_64"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇴</span><div class="tn home">Colombia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇵🇹</span><div class="tn away">Portugal</div></div></div>
   <div class="pr">
     <a id="rb_64_1" href="javascript:void(0)" onclick="SR(64,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_64_3" href="javascript:void(0)" onclick="SR(64,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -874,8 +893,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_65">
-  <div class="mh"><span class="mn">P66 · Grupo K</span><span id="rl_65" class="rl"></span><span id="ck_65"></span></div>
-  <div class="mt"><div class="tn home">R.D. Congo</div><div class="vs">VS</div><div class="tn away">Uzbekistán</div></div>
+  <div class="mh"><span class="mn">P66 · Grupo K</span><span class="mtime">🕐 20:30</span><span id="rl_65" class="rl"></span><span id="ck_65"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇨🇩</span><div class="tn home">R.D. Congo</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇺🇿</span><div class="tn away">Uzbekistán</div></div></div>
   <div class="pr">
     <a id="rb_65_1" href="javascript:void(0)" onclick="SR(65,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_65_3" href="javascript:void(0)" onclick="SR(65,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -883,8 +902,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_70">
-  <div class="mh"><span class="mn">P71 · Grupo L</span><span id="rl_70" class="rl"></span><span id="ck_70"></span></div>
-  <div class="mt"><div class="tn home">Panamá</div><div class="vs">VS</div><div class="tn away">Inglaterra</div></div>
+  <div class="mh"><span class="mn">P71 · Grupo L</span><span class="mtime">🕐 18:00</span><span id="rl_70" class="rl"></span><span id="ck_70"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇵🇦</span><div class="tn home">Panamá</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🏴</span><div class="tn away">Inglaterra</div></div></div>
   <div class="pr">
     <a id="rb_70_1" href="javascript:void(0)" onclick="SR(70,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_70_3" href="javascript:void(0)" onclick="SR(70,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -892,8 +911,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <div class="mc" id="card_71">
-  <div class="mh"><span class="mn">P72 · Grupo L</span><span id="rl_71" class="rl"></span><span id="ck_71"></span></div>
-  <div class="mt"><div class="tn home">Croacia</div><div class="vs">VS</div><div class="tn away">Ghana</div></div>
+  <div class="mh"><span class="mn">P72 · Grupo L</span><span class="mtime">🕐 18:00</span><span id="rl_71" class="rl"></span><span id="ck_71"></span></div>
+  <div class="mt"><div class="tn-wrap home"><span class="tflag">🇭🇷</span><div class="tn home">Croacia</div></div><div class="vs">VS</div><div class="tn-wrap away"><span class="tflag">🇬🇭</span><div class="tn away">Ghana</div></div></div>
   <div class="pr">
     <a id="rb_71_1" href="javascript:void(0)" onclick="SR(71,1);return false" class="pb">1<br><small>Local</small></a>
     <a id="rb_71_3" href="javascript:void(0)" onclick="SR(71,3);return false" class="pb">X<br><small>Empate</small></a>
@@ -946,84 +965,84 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <th class="th-fixed th-res">Resultado</th>
 <th class="th-player" title="AleDíaz">AleDíaz</th>
 <th class="th-player" title="Charly">Charly</th>
-<th class="th-player" title="Clau Preci 🐕">Clau Prec</th>
-<th class="th-player" title="Dani Kif (Sol o Guille)">Dani Kif </th>
+<th class="th-player" title="Clau Preci 🐕">Clau Preci 🐕</th>
+<th class="th-player" title="Dani Kif (Sol o Guille)">Dani Kif (Sol o Guille)</th>
 <th class="th-player" title="Gaby">Gaby</th>
-<th class="th-player" title="German Roitbarg">German Ro</th>
-<th class="th-player" title="Gustavo Basso">Gustavo B</th>
+<th class="th-player" title="German Roitbarg">German Roitbarg</th>
+<th class="th-player" title="Gustavo Basso">Gustavo Basso</th>
 <th class="th-player" title="Ivy Luk">Ivy Luk</th>
 <th class="th-player" title="Javier">Javier</th>
 <th class="th-player" title="Laly">Laly</th>
-<th class="th-player" title="Luio Marotta">Luio Maro</th>
-<th class="th-player" title="Marcelo marchese">Marcelo m</th>
-<th class="th-player" title="Mauro Cortés">Mauro Cor</th>
+<th class="th-player" title="Luio Marotta">Luio Marotta</th>
+<th class="th-player" title="Marcelo marchese">Marcelo marchese</th>
+<th class="th-player" title="Mauro Cortés">Mauro Cortés</th>
 <th class="th-player" title="Mirko">Mirko</th>
 <th class="th-player" title="Monona">Monona</th>
-<th class="th-player" title="RAMI, VALEN Y RAFA">RAMI, VAL</th>
+<th class="th-player" title="RAMI, VALEN Y RAFA">RAMI, VALEN Y RAFA</th>
 <th class="th-player" title="Sol Peña">Sol Peña</th>
 <th class="th-player" title="Tucu">Tucu</th>
-<th class="th-player" title="Victor Mellis">Victor Me</th>
-<th class="th-player" title="William Peña">William P</th>
-<th class="th-player" title="Horacio Peña (Guille o Sol)">Horacio P</th>
+<th class="th-player" title="Victor Mellis">Victor Mellis</th>
+<th class="th-player" title="William Peña">William Peña</th>
+<th class="th-player" title="Horacio Peña (Guille o Sol)">Horacio Peña (Guille o Sol)</th>
 <th class="th-player" title="RaulB 1">RaulB 1</th>
 <th class="th-player" title="RaulB 2">RaulB 2</th>
-<th class="th-player" title="Negro Caruga">Negro Car</th>
+<th class="th-player" title="Negro Caruga">Negro Caruga</th>
 <th class="th-player" title="MANUUU">MANUUU</th>
-<th class="th-player" title="Enzo Finocchiaro">Enzo Fino</th>
-<th class="th-player" title="Marcelo lucade Marsico">Marcelo l</th>
-<th class="th-player" title="Mario Escobar">Mario Esc</th>
-<th class="th-player" title="Damian Escobar">Damian Es</th>
-<th class="th-player" title="justo echague">justo ech</th>
-<th class="th-player" title="Tula Ignacio">Tula Igna</th>
-<th class="th-player" title="PabloRaulDelRio">PabloRaul</th>
-<th class="th-player" title="PabloDelRio">PabloDelR</th>
-<th class="th-player" title="Franco Preci">Franco Pr</th>
+<th class="th-player" title="Enzo Finocchiaro">Enzo Finocchiaro</th>
+<th class="th-player" title="Marcelo lucade Marsico">Marcelo lucade Marsico</th>
+<th class="th-player" title="Mario Escobar">Mario Escobar</th>
+<th class="th-player" title="Damian Escobar">Damian Escobar</th>
+<th class="th-player" title="justo echague">justo echague</th>
+<th class="th-player" title="Tula Ignacio">Tula Ignacio</th>
+<th class="th-player" title="PabloRaulDelRio">PabloRaulDelRio</th>
+<th class="th-player" title="PabloDelRio">PabloDelRio</th>
+<th class="th-player" title="Franco Preci">Franco Preci</th>
 <th class="th-player" title="Guga">Guga</th>
-<th class="th-player" title="Mateo Tula">Mateo Tul</th>
-<th class="th-player" title="Matias A M">Matias A </th>
-<th class="th-player" title="Hernán Echagüe">Hernán Ec</th>
+<th class="th-player" title="Mateo Tula">Mateo Tula</th>
+<th class="th-player" title="Matias A M">Matias A M</th>
+<th class="th-player" title="Hernán Echagüe">Hernán Echagüe</th>
 <th class="th-player" title="Pipo">Pipo</th>
-<th class="th-player" title="Javier Sobris">Javier So</th>
-<th class="th-player" title="Facu - Seba">Facu - Se</th>
-<th class="th-player" title="Vicky Finocchiaro">Vicky Fin</th>
-<th class="th-player" title="Isabel finocchiaro">Isabel fi</th>
-<th class="th-player" title="Augusto Finocchiaro Preci">Augusto F</th>
+<th class="th-player" title="Javier Sobris">Javier Sobris</th>
+<th class="th-player" title="Facu - Seba">Facu - Seba</th>
+<th class="th-player" title="Vicky Finocchiaro">Vicky Finocchiaro</th>
+<th class="th-player" title="Isabel finocchiaro">Isabel finocchiaro</th>
+<th class="th-player" title="Augusto Finocchiaro Preci">Augusto Finocchiaro Preci</th>
 <th class="th-player" title="STDM">STDM</th>
-<th class="th-player" title="santi_tula">santi_tul</th>
-<th class="th-player" title="GONZA TULA">GONZA TUL</th>
-<th class="th-player" title="Noelia Soledad Villalba">Noelia So</th>
-<th class="th-player" title="Fernando Preci">Fernando </th>
+<th class="th-player" title="santi_tula">santi_tula</th>
+<th class="th-player" title="GONZA TULA">GONZA TULA</th>
+<th class="th-player" title="Noelia Soledad Villalba">Noelia Soledad Villalba</th>
+<th class="th-player" title="Fernando Preci">Fernando Preci</th>
 <th class="th-player" title="Luis Tula">Luis Tula</th>
 <th class="th-player" title="Fiorella">Fiorella</th>
-<th class="th-player" title="Mariano Cecutta">Mariano C</th>
-<th class="th-player" title="Pedro_Bilardo">Pedro_Bi…</th>
-<th class="th-player" title="Romina Escobar">Romina E…</th>
-<th class="th-player" title="Kabe Rodriguez">Kabe Rod…</th>
-<th class="th-player" title="VANE y RAFA">VANE y R…</th>
-<th class="th-player" title="Juampi Casanova">Juampi C…</th>
+<th class="th-player" title="Mariano Cecutta">Mariano Cecutta</th>
+<th class="th-player" title="Pedro_Bilardo">Pedro_Bilardo</th>
+<th class="th-player" title="Romina Escobar">Romina Escobar</th>
+<th class="th-player" title="Kabe Rodriguez">Kabe Rodriguez</th>
+<th class="th-player" title="VANE y RAFA">VANE y RAFA</th>
+<th class="th-player" title="Juampi Casanova">Juampi Casanova</th>
 <th class="th-player" title="GARQUI">GARQUI</th>
-<th class="th-player" title="luis Emilio">luis Emi…</th>
+<th class="th-player" title="luis Emilio">luis Emilio</th>
 <th class="th-player" title="MARBIAN">MARBIAN</th>
-<th class="th-player" title="Gordo xeneize 0115">Gordo xe…</th>
-<th class="th-player" title="Mariano Cosentino">Mariano …</th>
-<th class="th-player" title="SANTIAGO ROJAS">SANTIAGO…</th>
-<th class="th-player" title="QUIQUE CECUTTA">QUIQUE C…</th>
-<th class="th-player" title="CAMILA CECUTTA">CAMILA C…</th>
-<th class="th-player" title="Agustina Luksic">Agustina…</th>
-<th class="th-player" title="Franco T. (Fabian)">Franco T…</th>
+<th class="th-player" title="Gordo xeneize 0115">Gordo xeneize 0115</th>
+<th class="th-player" title="Mariano Cosentino">Mariano Cosentino</th>
+<th class="th-player" title="SANTIAGO ROJAS">SANTIAGO ROJAS</th>
+<th class="th-player" title="QUIQUE CECUTTA">QUIQUE CECUTTA</th>
+<th class="th-player" title="CAMILA CECUTTA">CAMILA CECUTTA</th>
+<th class="th-player" title="Agustina Luksic">Agustina Luksic</th>
+<th class="th-player" title="Franco T. (Fabian)">Franco T. (Fabian)</th>
 <th class="th-player" title="Julito">Julito</th>
-<th class="th-player" title="Vera Luksic">Vera Luk…</th>
-<th class="th-player" title="Rodrigo Cometti">Rodrigo …</th>
-<th class="th-player" title="Lore matellan">Lore mat…</th>
-<th class="th-player" title="Fabian Yela">Fabian Y…</th>
-<th class="th-player" title="Gustavo del Rio">Gustavo …</th>
-<th class="th-player" title="Diego Del Rio">Diego De…</th>
-<th class="th-player" title="Facundo Del Rio">Facundo …</th>
-<th class="th-player" title="Mariano Ortiz">Mariano …</th>
-<th class="th-player" title="Pedro Francisco Cosentino">Pedro Fr…</th>
-<th class="th-player" title="MaPiQuLoBo">MaPiQuLo…</th>
+<th class="th-player" title="Vera Luksic">Vera Luksic</th>
+<th class="th-player" title="Rodrigo Cometti">Rodrigo Cometti</th>
+<th class="th-player" title="Lore matellan">Lore matellan</th>
+<th class="th-player" title="Fabian Yela">Fabian Yela</th>
+<th class="th-player" title="Gustavo del Rio">Gustavo del Rio</th>
+<th class="th-player" title="Diego Del Rio">Diego Del Rio</th>
+<th class="th-player" title="Facundo Del Rio">Facundo Del Rio</th>
+<th class="th-player" title="Mariano Ortiz">Mariano Ortiz</th>
+<th class="th-player" title="Pedro Francisco Cosentino">Pedro Francisco Cosentino</th>
+<th class="th-player" title="MaPiQuLoBo">MaPiQuLoBo</th>
 <th class="th-player" title="claudIA">claudIA</th>
-<th class="th-player" title="Rodri Matellan">Rodri Ma…</th>
+<th class="th-player" title="Rodri Matellan">Rodri Matellan</th>
 </tr>
 </thead>
 <tbody id="ptbody">
@@ -7307,10 +7326,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 </div>
 
 <div class="bnav">
-  <a href="javascript:void(0)" id="nr" class="on" onclick="SV('r')"><span>⚽</span>RESULTADOS</a>
-  <a href="javascript:void(0)" id="nt" onclick="SV('t')"><span>🏅</span>TABLA</a>
-  <a href="javascript:void(0)" id="np" onclick="SV('p')"><span>📊</span>PRONÓS.</a>
-  <a href="javascript:void(0)" id="nc" onclick="SV('c')"><span>🎲</span>CURIOS.</a>
+  <a href="javascript:void(0)" id="nr" class="on" onclick="SV('r')"><span>🏟️</span>RESULTADOS</a>
+  <a href="javascript:void(0)" id="nt" onclick="SV('t')"><span>🏆</span>TABLA</a>
+  <a href="javascript:void(0)" id="np" onclick="SV('p')"><span>📋</span>PRONÓS.</a>
+  <a href="javascript:void(0)" id="nc" onclick="SV('c')"><span>🌟</span>CURIOS.</a>
 </div>
 
 <script>
@@ -7462,6 +7481,7 @@ function SR(mi, v) {
   US();
   autoSave();
   updatePronoRow(mi);
+  renderTicker();
 }
 
 function UC(mi) {
@@ -7573,6 +7593,123 @@ function entropy3(c1, c3, c2) {
     }
   });
   return e;
+}
+
+function buildLiveTickerItems() {
+  var items = [];
+  var resKeys = Object.keys(results);
+  if (resKeys.length === 0 || P.length === 0) return items;
+
+  var datesWithResults = [];
+  resKeys.forEach(function(k){
+    var d = MATCH_DATES[parseInt(k)];
+    if (datesWithResults.indexOf(d) === -1) datesWithResults.push(d);
+  });
+  datesWithResults.sort(function(a,b){ return parseInt(a) - parseInt(b); });
+  var today = datesWithResults[datesWithResults.length-1];
+
+  function computeRanking(excludeToday) {
+    var sc = P.map(function(name, pi){
+      var pts = 0;
+      resKeys.forEach(function(k){
+        var mi = parseInt(k);
+        if (excludeToday && MATCH_DATES[mi] === today) return;
+        if (PK[pi][mi] === results[k]) pts++;
+      });
+      return {pi: pi, p: pts};
+    });
+    sc.sort(function(a,b){ return b.p - a.p; });
+    var pos = {};
+    sc.forEach(function(s, idx){ pos[s.pi] = idx+1; });
+    return pos;
+  }
+
+  var hayResultadosAntesDeHoy = resKeys.some(function(k){ return MATCH_DATES[parseInt(k)] !== today; });
+
+  if (hayResultadosAntesDeHoy) {
+    var posAyer = computeRanking(true);
+    var posHoy = computeRanking(false);
+    var movs = P.map(function(name, pi){
+      return {pi: pi, ayer: posAyer[pi], hoy: posHoy[pi], delta: posAyer[pi] - posHoy[pi]};
+    });
+
+    var nuevoLider = movs.find(function(m){ return m.hoy === 1 && m.ayer !== 1; });
+    if (nuevoLider) {
+      items.push('👑 ' + P[nuevoLider.pi] + ' pasó al PRIMER PUESTO con los resultados de hoy');
+    }
+
+    var bestClimb = movs.slice().sort(function(a,b){ return b.delta - a.delta; })[0];
+    if (bestClimb.delta >= 3) {
+      items.push('▲ ' + P[bestClimb.pi] + ' subió ' + bestClimb.delta + ' puestos hoy (del ' + bestClimb.ayer + '° al ' + bestClimb.hoy + '°)');
+    }
+
+    var worstFall = movs.slice().sort(function(a,b){ return a.delta - b.delta; })[0];
+    if (worstFall.delta <= -3) {
+      items.push('▼ ' + P[worstFall.pi] + ' bajó ' + Math.abs(worstFall.delta) + ' puestos hoy (del ' + worstFall.ayer + '° al ' + worstFall.hoy + '°)');
+    }
+  }
+
+  var todayKeys = resKeys.filter(function(k){ return MATCH_DATES[parseInt(k)] === today; });
+  if (todayKeys.length > 1) {
+    var hoyScores = P.map(function(name, pi){
+      var pts = 0;
+      todayKeys.forEach(function(k){ if (PK[pi][parseInt(k)] === results[k]) pts++; });
+      return {pi: pi, p: pts};
+    });
+    var maxHoy = hoyScores.slice().sort(function(a,b){ return b.p - a.p; })[0];
+    var minHoy = hoyScores.slice().sort(function(a,b){ return a.p - b.p; })[0];
+    if (maxHoy.p === todayKeys.length) {
+      items.push('💯 ' + P[maxHoy.pi] + ' hizo pleno hoy: acertó los ' + todayKeys.length + ' partidos');
+    }
+    if (minHoy.p === 0) {
+      items.push('😬 ' + P[minHoy.pi] + ' no acertó ninguno de los ' + todayKeys.length + ' partidos de hoy');
+    }
+  }
+
+  var miByDate = [];
+  for (var mi5 = 0; mi5 < 72; mi5++) if (results.hasOwnProperty(String(mi5))) miByDate.push(mi5);
+  miByDate.sort(function(a,b){
+    var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
+    if (da !== db) return da - db;
+    return a - b;
+  });
+  if (miByDate.length >= 3) {
+    var streakStats = P.map(function(name, pi){
+      var curOk = 0, maxOk = 0, curKo = 0, maxKo = 0;
+      miByDate.forEach(function(mi){
+        if (PK[pi][mi] === results[mi]) { curOk++; maxOk = Math.max(maxOk, curOk); curKo = 0; }
+        else { curKo++; maxKo = Math.max(maxKo, curKo); curOk = 0; }
+      });
+      return {pi: pi, maxOk: maxOk, maxKo: maxKo};
+    });
+    var hotStreak = streakStats.slice().sort(function(a,b){ return b.maxOk - a.maxOk; })[0];
+    var coldStreak = streakStats.slice().sort(function(a,b){ return b.maxKo - a.maxKo; })[0];
+    if (hotStreak.maxOk >= 3) items.push('🔥 ' + P[hotStreak.pi] + ' lleva ' + hotStreak.maxOk + ' aciertos seguidos');
+    if (coldStreak.maxKo >= 3) items.push('🧊 ' + P[coldStreak.pi] + ' lleva ' + coldStreak.maxKo + ' fallos seguidos');
+  }
+
+  // Lider actual
+  var posHoy2 = computeRanking(false);
+  var liderPi = Object.keys(posHoy2).find(function(pi){ return posHoy2[pi] === 1; });
+  if (liderPi !== undefined) {
+    items.push('🏆 ' + P[liderPi] + ' lidera el prode con ' + resKeys.length + ' resultados jugados');
+  }
+
+  return items;
+}
+
+function renderTicker() {
+  var ticker = document.getElementById('tickerWrap');
+  if (!ticker) return;
+  var items = buildLiveTickerItems();
+  if (items.length === 0) {
+    ticker.style.display = 'none';
+    return;
+  }
+  ticker.style.display = 'flex';
+  var track = document.getElementById('tickerTrack');
+  var content = items.map(function(it){ return '<span class="ticker-item">' + it + '</span>'; }).join('<span class="ticker-sep">•</span>');
+  track.innerHTML = content + '<span class="ticker-sep">•</span>' + content;
 }
 
 function pickCounts(mi) {
@@ -7773,6 +7910,141 @@ function updateCuriosidades() {
     }
   }
 
+  // 10. EN VIVO - cambios de hoy vs ayer
+  var resKeys2 = Object.keys(results);
+  if (resKeys2.length > 0 && P.length > 0) {
+    var datesWithResults = [];
+    resKeys2.forEach(function(k){
+      var d = MATCH_DATES[parseInt(k)];
+      if (datesWithResults.indexOf(d) === -1) datesWithResults.push(d);
+    });
+    datesWithResults.sort(function(a,b){ return parseInt(a) - parseInt(b); });
+    var today = datesWithResults[datesWithResults.length-1];
+
+    function computeRanking(excludeToday) {
+      var sc = P.map(function(name, pi){
+        var pts = 0;
+        resKeys2.forEach(function(k){
+          var mi = parseInt(k);
+          if (excludeToday && MATCH_DATES[mi] === today) return;
+          if (PK[pi][mi] === results[k]) pts++;
+        });
+        return {pi: pi, p: pts};
+      });
+      sc.sort(function(a,b){ return b.p - a.p; });
+      var pos = {};
+      sc.forEach(function(s, idx){ pos[s.pi] = idx+1; });
+      return pos;
+    }
+
+    var hayResultadosAntesDeHoy = resKeys2.some(function(k){ return MATCH_DATES[parseInt(k)] !== today; });
+
+    if (hayResultadosAntesDeHoy) {
+      var posAyer = computeRanking(true);
+      var posHoy = computeRanking(false);
+
+      var movs = P.map(function(name, pi){
+        return {pi: pi, ayer: posAyer[pi], hoy: posHoy[pi], delta: posAyer[pi] - posHoy[pi]};
+      });
+
+      html += '<div class="ccat">🔴 En vivo</div>';
+
+      // Pasó a la punta
+      var nuevoLider = movs.find(function(m){ return m.hoy === 1 && m.ayer !== 1; });
+      if (nuevoLider) {
+        html += '<div class="ccard"><div class="ccard-title">Nuevo puntero</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[nuevoLider.pi]+'</div>' +
+          '<div class="ccard-sub">pasó del puesto '+nuevoLider.ayer+'° al 1° con los resultados de hoy</div></div>' +
+          '<div class="ccard-stat">👑</div></div></div>';
+      }
+
+      // Mayor remontada
+      var bestClimb = movs.slice().sort(function(a,b){ return b.delta - a.delta; })[0];
+      if (bestClimb.delta > 0) {
+        html += '<div class="ccard"><div class="ccard-title">La remontada del día</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[bestClimb.pi]+'</div>' +
+          '<div class="ccard-sub">subió del puesto '+bestClimb.ayer+'° al '+bestClimb.hoy+'°</div></div>' +
+          '<div class="ccard-stat">▲'+bestClimb.delta+'</div></div></div>';
+      }
+
+      // Mayor caida
+      var worstFall = movs.slice().sort(function(a,b){ return a.delta - b.delta; })[0];
+      if (worstFall.delta < 0) {
+        html += '<div class="ccard"><div class="ccard-title">El que más cayó</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[worstFall.pi]+'</div>' +
+          '<div class="ccard-sub">bajó del puesto '+worstFall.ayer+'° al '+worstFall.hoy+'°</div></div>' +
+          '<div class="ccard-stat">▼'+Math.abs(worstFall.delta)+'</div></div></div>';
+      }
+    }
+
+    // Pleno de hoy / fiasco de hoy
+    var todayKeys = resKeys2.filter(function(k){ return MATCH_DATES[parseInt(k)] === today; });
+    if (todayKeys.length > 0) {
+      var hoyScores = P.map(function(name, pi){
+        var pts = 0;
+        todayKeys.forEach(function(k){
+          if (PK[pi][parseInt(k)] === results[k]) pts++;
+        });
+        return {pi: pi, p: pts};
+      });
+      var maxHoy = hoyScores.slice().sort(function(a,b){ return b.p - a.p; })[0];
+      var minHoy = hoyScores.slice().sort(function(a,b){ return a.p - b.p; })[0];
+
+      if (maxHoy.p === todayKeys.length && todayKeys.length > 1) {
+        html += '<div class="ccard"><div class="ccard-title">Pleno del día</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[maxHoy.pi]+'</div>' +
+          '<div class="ccard-sub">acertó los '+todayKeys.length+' partidos de hoy</div></div>' +
+          '<div class="ccard-stat">💯</div></div></div>';
+      }
+      if (minHoy.p === 0 && todayKeys.length > 1) {
+        html += '<div class="ccard"><div class="ccard-title">Día para el olvido</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[minHoy.pi]+'</div>' +
+          '<div class="ccard-sub">no acertó ninguno de los '+todayKeys.length+' partidos de hoy</div></div>' +
+          '<div class="ccard-stat">😬</div></div></div>';
+      }
+    }
+
+    // Racha mas larga de aciertos / errores (global, en orden cronologico)
+    var miByDate = [];
+    for (var mi5 = 0; mi5 < 72; mi5++) {
+      if (results.hasOwnProperty(String(mi5))) miByDate.push(mi5);
+    }
+    miByDate.sort(function(a,b){
+      var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
+      if (da !== db) return da - db;
+      return a - b;
+    });
+
+    if (miByDate.length >= 3) {
+      var streakStats = P.map(function(name, pi){
+        var curOk = 0, maxOk = 0, curKo = 0, maxKo = 0;
+        miByDate.forEach(function(mi){
+          if (PK[pi][mi] === results[mi]) {
+            curOk++; maxOk = Math.max(maxOk, curOk); curKo = 0;
+          } else {
+            curKo++; maxKo = Math.max(maxKo, curKo); curOk = 0;
+          }
+        });
+        return {pi: pi, maxOk: maxOk, maxKo: maxKo};
+      });
+      var hotStreak = streakStats.slice().sort(function(a,b){ return b.maxOk - a.maxOk; })[0];
+      var coldStreak = streakStats.slice().sort(function(a,b){ return b.maxKo - a.maxKo; })[0];
+
+      if (hotStreak.maxOk >= 3) {
+        html += '<div class="ccard"><div class="ccard-title">Racha caliente</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[hotStreak.pi]+'</div>' +
+          '<div class="ccard-sub">acertó '+hotStreak.maxOk+' resultados seguidos</div></div>' +
+          '<div class="ccard-stat">🔥</div></div></div>';
+      }
+      if (coldStreak.maxKo >= 3) {
+        html += '<div class="ccard"><div class="ccard-title">Racha fría</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[coldStreak.pi]+'</div>' +
+          '<div class="ccard-sub">erró '+coldStreak.maxKo+' resultados seguidos</div></div>' +
+          '<div class="ccard-stat">🧊</div></div></div>';
+      }
+    }
+  }
+
   wrap.innerHTML = html;
 }
 
@@ -7804,7 +8076,6 @@ function populatePlayerSelect() {
 function onPlayerSelect(val) {
   if (val === '') {
     document.getElementById('playerCard').innerHTML = '';
-    document.getElementById('pdateChips').style.display = 'none';
     return;
   }
   showPlayerCard(parseInt(val));
@@ -7839,8 +8110,16 @@ function showPlayerCard(pi) {
   html += '</div>';
 
   html += '<div id="pmatchesList">';
+  var miOrder = [];
+  for (var mi = 0; mi < 72; mi++) miOrder.push(mi);
+  miOrder.sort(function(a,b){
+    var da = parseInt(MATCH_DATES[a]);
+    var db = parseInt(MATCH_DATES[b]);
+    if (da !== db) return da - db;
+    return a - b;
+  });
   var lastDate = null;
-  for (var mi = 0; mi < 72; mi++) {
+  miOrder.forEach(function(mi){
     var date = MATCH_DATES[mi];
     if (date !== lastDate) {
       html += '<div class="pdate-sep" data-date="'+date+'">📅 '+date+'</div>';
@@ -7860,7 +8139,7 @@ function showPlayerCard(pi) {
     html += '<div class="'+matchCls+'" data-date="'+date+'">' +
       '<div class="pmatch-teams"><span class="pmatch-num">P'+(mi+1)+'</span>'+MATCHES[mi][0]+' vs '+MATCHES[mi][1]+'</div>' +
       '<div class="pmatch-pick '+cls+'">'+pickLabel+'</div></div>';
-  }
+  });
   html += '</div>';
 
   document.getElementById('playerCard').innerHTML = html;
@@ -7880,6 +8159,7 @@ function filterPlayerCardByDate(chipEl, date) {
 loadResults();
 restoreAllCards();
 populatePlayerSelect();
+renderTicker();
 </script>
 </body>
 </html>
