@@ -49,7 +49,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .ticker-wrap{display:flex;align-items:center;background:#1a1a1a;border-bottom:3px solid var(--red);overflow:hidden;position:relative;}
 .ticker-label{flex-shrink:0;background:var(--red);color:#fff;font-family:'Poppins',sans-serif;font-weight:900;font-size:11px;letter-spacing:1px;padding:8px 12px;white-space:nowrap;}
 .ticker-track-wrap{flex:1;overflow:hidden;position:relative;}
-.ticker-track{display:inline-flex;align-items:center;white-space:nowrap;animation:ticker-scroll 40s linear infinite;padding-left:16px;}
+.ticker-track{display:inline-flex;align-items:center;white-space:nowrap;animation:ticker-scroll 110s linear infinite;padding-left:16px;}
 .ticker-item{color:#fff;font-size:12px;font-weight:700;padding:8px 0;}
 .ticker-sep{color:var(--lime);font-weight:900;padding:8px 16px;}
 @keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
@@ -7527,11 +7527,25 @@ function RT() {
     return {n: name, p: pts};
   });
   scores.sort(function(a,b) { return b.p - a.p; });
+  // Ranking compartido: mismos puntos = mismo puesto
+  var ranks = [];
+  var curRank = 1;
+  for (var i = 0; i < scores.length; i++) {
+    if (i > 0 && scores[i].p === scores[i-1].p) {
+      ranks.push(ranks[i-1]);
+    } else {
+      ranks.push(curRank);
+    }
+    curRank = i + 2;
+  }
   var medals = ['🥇','🥈','🥉'], pc = ['g','s','b'], html = '';
-  scores.forEach(function(s, rank) {
+  scores.forEach(function(s, i) {
+    var rank = ranks[i];
     var pct = Math.round(s.p / played * 100);
-    html += '<div class="tr' + (rank===0?' t1':'') + '">' +
-      '<div class="tpos ' + (pc[rank]||'n') + '">' + (medals[rank]||(rank+1)) + '</div>' +
+    var posLabel = (rank <= 3 && medals[rank-1]) ? medals[rank-1] : rank + '°';
+    var posClass = rank <= 3 ? (pc[rank-1]) : 'n';
+    html += '<div class="tr' + (rank===1?' t1':'') + '">' +
+      '<div class="tpos ' + posClass + '">' + posLabel + '</div>' +
       '<div class="tnam">' + s.n + '</div>' +
       '<div class="tsc"><div class="tsc-big">' + s.p + '</div>' +
       '<div class="tsc-sub">' + pct + '% · ' + s.p + '/' + played + '</div></div></div>';
@@ -7600,83 +7614,122 @@ function buildLiveTickerItems() {
   var resKeys = Object.keys(results);
   if (resKeys.length === 0 || P.length === 0) return items;
 
-  var datesWithResults = [];
-  resKeys.forEach(function(k){
-    var d = MATCH_DATES[parseInt(k)];
-    if (datesWithResults.indexOf(d) === -1) datesWithResults.push(d);
-  });
-  datesWithResults.sort(function(a,b){ return parseInt(a) - parseInt(b); });
-  var today = datesWithResults[datesWithResults.length-1];
-
-  function computeRanking(excludeToday) {
-    var sc = P.map(function(name, pi){
-      var pts = 0;
-      resKeys.forEach(function(k){
-        var mi = parseInt(k);
-        if (excludeToday && MATCH_DATES[mi] === today) return;
-        if (PK[pi][mi] === results[k]) pts++;
-      });
-      return {pi: pi, p: pts};
-    });
-    sc.sort(function(a,b){ return b.p - a.p; });
-    var pos = {};
-    sc.forEach(function(s, idx){ pos[s.pi] = idx+1; });
-    return pos;
-  }
-
-  var hayResultadosAntesDeHoy = resKeys.some(function(k){ return MATCH_DATES[parseInt(k)] !== today; });
-
-  if (hayResultadosAntesDeHoy) {
-    var posAyer = computeRanking(true);
-    var posHoy = computeRanking(false);
-    var movs = P.map(function(name, pi){
-      return {pi: pi, ayer: posAyer[pi], hoy: posHoy[pi], delta: posAyer[pi] - posHoy[pi]};
-    });
-
-    var nuevoLider = movs.find(function(m){ return m.hoy === 1 && m.ayer !== 1; });
-    if (nuevoLider) {
-      items.push('👑 ' + P[nuevoLider.pi] + ' pasó al PRIMER PUESTO con los resultados de hoy');
-    }
-
-    var bestClimb = movs.slice().sort(function(a,b){ return b.delta - a.delta; })[0];
-    if (bestClimb.delta >= 3) {
-      items.push('▲ ' + P[bestClimb.pi] + ' subió ' + bestClimb.delta + ' puestos hoy (del ' + bestClimb.ayer + '° al ' + bestClimb.hoy + '°)');
-    }
-
-    var worstFall = movs.slice().sort(function(a,b){ return a.delta - b.delta; })[0];
-    if (worstFall.delta <= -3) {
-      items.push('▼ ' + P[worstFall.pi] + ' bajó ' + Math.abs(worstFall.delta) + ' puestos hoy (del ' + worstFall.ayer + '° al ' + worstFall.hoy + '°)');
-    }
-  }
-
-  var todayKeys = resKeys.filter(function(k){ return MATCH_DATES[parseInt(k)] === today; });
-  if (todayKeys.length > 1) {
-    var hoyScores = P.map(function(name, pi){
-      var pts = 0;
-      todayKeys.forEach(function(k){ if (PK[pi][parseInt(k)] === results[k]) pts++; });
-      return {pi: pi, p: pts};
-    });
-    var maxHoy = hoyScores.slice().sort(function(a,b){ return b.p - a.p; })[0];
-    var minHoy = hoyScores.slice().sort(function(a,b){ return a.p - b.p; })[0];
-    if (maxHoy.p === todayKeys.length) {
-      items.push('💯 ' + P[maxHoy.pi] + ' hizo pleno hoy: acertó los ' + todayKeys.length + ' partidos');
-    }
-    if (minHoy.p === 0) {
-      items.push('😬 ' + P[minHoy.pi] + ' no acertó ninguno de los ' + todayKeys.length + ' partidos de hoy');
-    }
-  }
-
-  var miByDate = [];
-  for (var mi5 = 0; mi5 < 72; mi5++) if (results.hasOwnProperty(String(mi5))) miByDate.push(mi5);
-  miByDate.sort(function(a,b){
+  // Orden cronologico de los partidos jugados
+  var miByOrder = resKeys.map(function(k){ return parseInt(k); });
+  miByOrder.sort(function(a,b){
     var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
     if (da !== db) return da - db;
     return a - b;
   });
-  if (miByDate.length >= 3) {
+  var lastMi = miByOrder[miByOrder.length-1];
+  var prevMis = miByOrder.slice(0, miByOrder.length-1);
+
+  function computeRanking(miList) {
+    var sc = P.map(function(name, pi){
+      var pts = 0;
+      miList.forEach(function(mi){ if (PK[pi][mi] === results[mi]) pts++; });
+      return {pi: pi, p: pts};
+    });
+    sc.sort(function(a,b){ return b.p - a.p; });
+    // Ranking compartido: mismos puntos = mismo puesto
+    var ranks = [];
+    var curRank = 1;
+    for (var i = 0; i < sc.length; i++) {
+      if (i > 0 && sc[i].p === sc[i-1].p) ranks.push(ranks[i-1]);
+      else ranks.push(curRank);
+      curRank = i + 2;
+    }
+    var pos = {}, pts = {};
+    sc.forEach(function(s, idx){ pos[s.pi] = ranks[idx]; pts[s.pi] = s.p; });
+    var maxRank = ranks[ranks.length-1];
+    return {pos: pos, pts: pts, sorted: sc, maxRank: maxRank};
+  }
+
+  var after = computeRanking(miByOrder);
+
+  // ── Resultado del ultimo partido jugado ──
+  var resTxt = {1:'Local',3:'Empate',2:'Visitante'}[results[lastMi]];
+  var aciertosUltimo = 0;
+  P.forEach(function(name, pi){ if (PK[pi][lastMi] === results[lastMi]) aciertosUltimo++; });
+  var pctUltimo = Math.round(aciertosUltimo/P.length*100);
+  items.push('⚽ ' + matchLabel(lastMi) + ': ganó ' + resTxt + ' — ' + pctUltimo + '% del grupo (' + aciertosUltimo + '/' + P.length + ') le pegó');
+
+  // ── El unico que le pego ──
+  if (aciertosUltimo === 1) {
+    var unico = P.findIndex(function(name, pi){ return PK[pi][lastMi] === results[lastMi]; });
+    items.push('🎯 ¡' + P[unico] + ' fue el ÚNICO que le pegó a ' + matchLabel(lastMi) + '!');
+  }
+
+  if (prevMis.length > 0) {
+    var before = computeRanking(prevMis);
+    var movs = P.map(function(name, pi){
+      return {pi: pi, antes: before.pos[pi], ahora: after.pos[pi], delta: before.pos[pi] - after.pos[pi], ptsAntes: before.pts[pi], ptsAhora: after.pts[pi]};
+    });
+
+    // ── Cambio de lider: alguien que NO estaba en el 1° puesto (compartido o no) pasa a estarlo ──
+    var nuevoLider = movs.find(function(m){ return m.ahora === 1 && m.antes !== 1; });
+    if (nuevoLider) {
+      var compartiendo = after.sorted.filter(function(s){ return after.pos[s.pi] === 1; }).length > 1;
+      items.push('👑 ¡CAMBIO DE LÍDER! ' + P[nuevoLider.pi] + (compartiendo ? ' se sumó a la punta' : ' pasó al primer puesto') + ' tras ' + matchLabel(lastMi));
+    }
+
+    // ── Mayor remontada / caida en este partido ──
+    var bestClimb = movs.slice().sort(function(a,b){ return b.delta - a.delta; })[0];
+    if (bestClimb.delta >= 2) {
+      items.push('▲ ' + P[bestClimb.pi] + ' subió ' + bestClimb.delta + ' puestos con el resultado de ' + matchLabel(lastMi) + ' (' + bestClimb.antes + '° → ' + bestClimb.ahora + '°)');
+    }
+    var worstFall = movs.slice().sort(function(a,b){ return a.delta - b.delta; })[0];
+    if (worstFall.delta <= -2) {
+      items.push('▼ ' + P[worstFall.pi] + ' bajó ' + Math.abs(worstFall.delta) + ' puestos con el resultado de ' + matchLabel(lastMi) + ' (' + worstFall.antes + '° → ' + worstFall.ahora + '°)');
+    }
+
+    // ── El milagro: iba ultimo (puesto compartido o no) y mejoro ──
+    var lastPlaceBefore = before.maxRank;
+    var ibaUltimo = movs.filter(function(m){ return m.antes === lastPlaceBefore; });
+    if (ibaUltimo.length === 1 && ibaUltimo[0].delta > 0) {
+      items.push('🙏 El milagro: ' + P[ibaUltimo[0].pi] + ' iba último y subió ' + ibaUltimo[0].delta + ' puestos');
+    }
+  }
+
+  // ── Paso a paso: diferencia entre 1ro y 2do puesto (no entre personas empatadas) ──
+  if (after.sorted.length >= 2) {
+    var lideres = after.sorted.filter(function(s){ return after.pos[s.pi] === 1; });
+    var segundos = after.sorted.filter(function(s){ return after.pos[s.pi] === (lideres.length+1); });
+    if (lideres.length > 1) {
+      var nombresLideres = lideres.map(function(s){ return P[s.pi]; });
+      items.push('🤝 ¡Empate en la punta! ' + nombresLideres.join(', ') + ' comparten el primer lugar con ' + lideres[0].p + ' puntos');
+    } else if (segundos.length > 0) {
+      var diff12 = lideres[0].p - segundos[0].p;
+      items.push('📏 ' + P[lideres[0].pi] + ' lidera por ' + diff12 + ' punto' + (diff12!==1?'s':'') + ' sobre ' + segundos.map(function(s){return P[s.pi];}).join(', '));
+    }
+  }
+
+  // ── Promedio de aciertos general ──
+  var totalPts = after.sorted.reduce(function(s,x){ return s + x.p; }, 0);
+  var avg = (totalPts / P.length).toFixed(1);
+  items.push('📊 Promedio del grupo: ' + avg + ' aciertos sobre ' + miByOrder.length + ' partidos jugados (' + Math.round(avg/miByOrder.length*100) + '%)');
+
+  // ── El que sigue invicto (nunca erro) ──
+  if (miByOrder.length >= 2) {
+    var perfectos = P.filter(function(name, pi){ return after.pts[pi] === miByOrder.length; });
+    if (perfectos.length === 1) {
+      items.push('✅ ' + perfectos[0] + ' sigue INVICTO: ' + miByOrder.length + '/' + miByOrder.length + ' aciertos');
+    } else if (perfectos.length > 1 && perfectos.length <= 3) {
+      items.push('✅ Siguen invictos: ' + perfectos.join(', ') + ' (' + miByOrder.length + '/' + miByOrder.length + ')');
+    }
+
+    // El que sigue en cero
+    var ceros = P.filter(function(name, pi){ return after.pts[pi] === 0; });
+    if (ceros.length === 1) {
+      items.push('💀 ' + ceros[0] + ' sigue sin acertar ninguno (0/' + miByOrder.length + ')');
+    }
+  }
+
+  // ── Racha caliente / fria ──
+  if (miByOrder.length >= 3) {
     var streakStats = P.map(function(name, pi){
       var curOk = 0, maxOk = 0, curKo = 0, maxKo = 0;
-      miByDate.forEach(function(mi){
+      miByOrder.forEach(function(mi){
         if (PK[pi][mi] === results[mi]) { curOk++; maxOk = Math.max(maxOk, curOk); curKo = 0; }
         else { curKo++; maxKo = Math.max(maxKo, curKo); curOk = 0; }
       });
@@ -7688,11 +7741,23 @@ function buildLiveTickerItems() {
     if (coldStreak.maxKo >= 3) items.push('🧊 ' + P[coldStreak.pi] + ' lleva ' + coldStreak.maxKo + ' fallos seguidos');
   }
 
-  // Lider actual
-  var posHoy2 = computeRanking(false);
-  var liderPi = Object.keys(posHoy2).find(function(pi){ return posHoy2[pi] === 1; });
-  if (liderPi !== undefined) {
-    items.push('🏆 ' + P[liderPi] + ' lidera el prode con ' + resKeys.length + ' resultados jugados');
+  // ── Lider actual (puede haber varios empatados) ──
+  var lideresActuales = after.sorted.filter(function(s){ return after.pos[s.pi] === 1; });
+  if (lideresActuales.length === 1) {
+    var liderPi = lideresActuales[0].pi;
+    items.push('🏆 ' + P[liderPi] + ' lidera el prode con ' + after.pts[liderPi] + '/' + miByOrder.length + ' aciertos');
+  } else {
+    items.push('🏆 Hay ' + lideresActuales.length + ' punteros empatados con ' + lideresActuales[0].p + '/' + miByOrder.length + ' aciertos: ' + lideresActuales.map(function(s){return P[s.pi];}).join(', '));
+  }
+
+  // ── La tabla de abajo (ultimo/s puesto/s) ──
+  var ultimos = after.sorted.filter(function(s){ return after.pos[s.pi] === after.maxRank; });
+  if (ultimos.length === 1) {
+    items.push('📉 ' + P[ultimos[0].pi] + ' está último con ' + ultimos[0].p + '/' + miByOrder.length + ' aciertos');
+  } else if (ultimos.length > 1 && ultimos.length <= 5) {
+    items.push('📉 La tabla de abajo: ' + ultimos.map(function(s){return P[s.pi];}).join(', ') + ' comparten el último lugar con ' + ultimos[0].p + '/' + miByOrder.length);
+  } else if (ultimos.length > 5) {
+    items.push('📉 ' + ultimos.length + ' participantes comparten el último lugar con ' + ultimos[0].p + '/' + miByOrder.length + ' aciertos');
   }
 
   return items;
@@ -7910,115 +7975,174 @@ function updateCuriosidades() {
     }
   }
 
-  // 10. EN VIVO - cambios de hoy vs ayer
+  // 10. EN VIVO - analisis partido a partido
   var resKeys2 = Object.keys(results);
   if (resKeys2.length > 0 && P.length > 0) {
-    var datesWithResults = [];
-    resKeys2.forEach(function(k){
-      var d = MATCH_DATES[parseInt(k)];
-      if (datesWithResults.indexOf(d) === -1) datesWithResults.push(d);
-    });
-    datesWithResults.sort(function(a,b){ return parseInt(a) - parseInt(b); });
-    var today = datesWithResults[datesWithResults.length-1];
-
-    function computeRanking(excludeToday) {
-      var sc = P.map(function(name, pi){
-        var pts = 0;
-        resKeys2.forEach(function(k){
-          var mi = parseInt(k);
-          if (excludeToday && MATCH_DATES[mi] === today) return;
-          if (PK[pi][mi] === results[k]) pts++;
-        });
-        return {pi: pi, p: pts};
-      });
-      sc.sort(function(a,b){ return b.p - a.p; });
-      var pos = {};
-      sc.forEach(function(s, idx){ pos[s.pi] = idx+1; });
-      return pos;
-    }
-
-    var hayResultadosAntesDeHoy = resKeys2.some(function(k){ return MATCH_DATES[parseInt(k)] !== today; });
-
-    if (hayResultadosAntesDeHoy) {
-      var posAyer = computeRanking(true);
-      var posHoy = computeRanking(false);
-
-      var movs = P.map(function(name, pi){
-        return {pi: pi, ayer: posAyer[pi], hoy: posHoy[pi], delta: posAyer[pi] - posHoy[pi]};
-      });
-
-      html += '<div class="ccat">🔴 En vivo</div>';
-
-      // Pasó a la punta
-      var nuevoLider = movs.find(function(m){ return m.hoy === 1 && m.ayer !== 1; });
-      if (nuevoLider) {
-        html += '<div class="ccard"><div class="ccard-title">Nuevo puntero</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[nuevoLider.pi]+'</div>' +
-          '<div class="ccard-sub">pasó del puesto '+nuevoLider.ayer+'° al 1° con los resultados de hoy</div></div>' +
-          '<div class="ccard-stat">👑</div></div></div>';
-      }
-
-      // Mayor remontada
-      var bestClimb = movs.slice().sort(function(a,b){ return b.delta - a.delta; })[0];
-      if (bestClimb.delta > 0) {
-        html += '<div class="ccard"><div class="ccard-title">La remontada del día</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[bestClimb.pi]+'</div>' +
-          '<div class="ccard-sub">subió del puesto '+bestClimb.ayer+'° al '+bestClimb.hoy+'°</div></div>' +
-          '<div class="ccard-stat">▲'+bestClimb.delta+'</div></div></div>';
-      }
-
-      // Mayor caida
-      var worstFall = movs.slice().sort(function(a,b){ return a.delta - b.delta; })[0];
-      if (worstFall.delta < 0) {
-        html += '<div class="ccard"><div class="ccard-title">El que más cayó</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[worstFall.pi]+'</div>' +
-          '<div class="ccard-sub">bajó del puesto '+worstFall.ayer+'° al '+worstFall.hoy+'°</div></div>' +
-          '<div class="ccard-stat">▼'+Math.abs(worstFall.delta)+'</div></div></div>';
-      }
-    }
-
-    // Pleno de hoy / fiasco de hoy
-    var todayKeys = resKeys2.filter(function(k){ return MATCH_DATES[parseInt(k)] === today; });
-    if (todayKeys.length > 0) {
-      var hoyScores = P.map(function(name, pi){
-        var pts = 0;
-        todayKeys.forEach(function(k){
-          if (PK[pi][parseInt(k)] === results[k]) pts++;
-        });
-        return {pi: pi, p: pts};
-      });
-      var maxHoy = hoyScores.slice().sort(function(a,b){ return b.p - a.p; })[0];
-      var minHoy = hoyScores.slice().sort(function(a,b){ return a.p - b.p; })[0];
-
-      if (maxHoy.p === todayKeys.length && todayKeys.length > 1) {
-        html += '<div class="ccard"><div class="ccard-title">Pleno del día</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[maxHoy.pi]+'</div>' +
-          '<div class="ccard-sub">acertó los '+todayKeys.length+' partidos de hoy</div></div>' +
-          '<div class="ccard-stat">💯</div></div></div>';
-      }
-      if (minHoy.p === 0 && todayKeys.length > 1) {
-        html += '<div class="ccard"><div class="ccard-title">Día para el olvido</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[minHoy.pi]+'</div>' +
-          '<div class="ccard-sub">no acertó ninguno de los '+todayKeys.length+' partidos de hoy</div></div>' +
-          '<div class="ccard-stat">😬</div></div></div>';
-      }
-    }
-
-    // Racha mas larga de aciertos / errores (global, en orden cronologico)
-    var miByDate = [];
-    for (var mi5 = 0; mi5 < 72; mi5++) {
-      if (results.hasOwnProperty(String(mi5))) miByDate.push(mi5);
-    }
-    miByDate.sort(function(a,b){
+    var miByOrder2 = resKeys2.map(function(k){ return parseInt(k); });
+    miByOrder2.sort(function(a,b){
       var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
       if (da !== db) return da - db;
       return a - b;
     });
+    var lastMi2 = miByOrder2[miByOrder2.length-1];
+    var prevMis2 = miByOrder2.slice(0, miByOrder2.length-1);
 
-    if (miByDate.length >= 3) {
-      var streakStats = P.map(function(name, pi){
+    function computeRanking2(miList) {
+      var sc = P.map(function(name, pi){
+        var pts = 0;
+        miList.forEach(function(mi){ if (PK[pi][mi] === results[mi]) pts++; });
+        return {pi: pi, p: pts};
+      });
+      sc.sort(function(a,b){ return b.p - a.p; });
+      var ranks = [];
+      var curRank = 1;
+      for (var i = 0; i < sc.length; i++) {
+        if (i > 0 && sc[i].p === sc[i-1].p) ranks.push(ranks[i-1]);
+        else ranks.push(curRank);
+        curRank = i + 2;
+      }
+      var pos = {}, pts = {};
+      sc.forEach(function(s, idx){ pos[s.pi] = ranks[idx]; pts[s.pi] = s.p; });
+      var maxRank = ranks[ranks.length-1];
+      return {pos: pos, pts: pts, sorted: sc, maxRank: maxRank};
+    }
+
+    var after2 = computeRanking2(miByOrder2);
+
+    html += '<div class="ccat">🔴 En vivo</div>';
+
+    // Ultimo resultado
+    var resTxt2 = {1:'Local',3:'Empate',2:'Visitante'}[results[lastMi2]];
+    var aciertosUlt = 0;
+    P.forEach(function(name, pi){ if (PK[pi][lastMi2] === results[lastMi2]) aciertosUlt++; });
+    var pctUlt = Math.round(aciertosUlt/P.length*100);
+    html += '<div class="ccard"><div class="ccard-title">Último resultado cargado</div>' +
+      '<div class="ccard-row"><div><div class="ccard-main">'+matchLabel(lastMi2)+' — '+resTxt2+'</div>' +
+      '<div class="ccard-sub">le pegaron '+aciertosUlt+' de '+P.length+' participantes</div></div>' +
+      '<div class="ccard-stat">'+pctUlt+'%</div></div></div>';
+
+    // El unico que le pego
+    if (aciertosUlt === 1) {
+      var unicoPi = P.findIndex(function(name, pi){ return PK[pi][lastMi2] === results[lastMi2]; });
+      html += '<div class="ccard"><div class="ccard-title">🎯 Único que le pegó</div>' +
+        '<div class="ccard-row"><div><div class="ccard-main">'+P[unicoPi]+'</div>' +
+        '<div class="ccard-sub">fue el ÚNICO de '+P.length+' en acertar '+matchLabel(lastMi2)+'</div></div>' +
+        '<div class="ccard-stat">🏅</div></div></div>';
+    }
+
+    if (prevMis2.length > 0) {
+      var before2 = computeRanking2(prevMis2);
+      var movs2 = P.map(function(name, pi){
+        return {pi: pi, antes: before2.pos[pi], ahora: after2.pos[pi], delta: before2.pos[pi] - after2.pos[pi]};
+      });
+
+      // Cambio de lider
+      var nuevoLider2 = movs2.find(function(m){ return m.ahora === 1 && m.antes !== 1; });
+      if (nuevoLider2) {
+        var compartiendo2 = after2.sorted.filter(function(s){ return after2.pos[s.pi] === 1; }).length > 1;
+        html += '<div class="ccard"><div class="ccard-title">👑 Cambio de líder</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[nuevoLider2.pi]+'</div>' +
+          '<div class="ccard-sub">'+(compartiendo2 ? 'se sumó a la punta' : 'pasó al 1° puesto')+' tras '+matchLabel(lastMi2)+'</div></div>' +
+          '<div class="ccard-stat">👑</div></div></div>';
+      }
+
+      // Mayor remontada
+      var bestClimb2 = movs2.slice().sort(function(a,b){ return b.delta - a.delta; })[0];
+      if (bestClimb2.delta > 0) {
+        html += '<div class="ccard"><div class="ccard-title">La remontada del momento</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[bestClimb2.pi]+'</div>' +
+          '<div class="ccard-sub">subió del puesto '+bestClimb2.antes+'° al '+bestClimb2.ahora+'°</div></div>' +
+          '<div class="ccard-stat">▲'+bestClimb2.delta+'</div></div></div>';
+      }
+
+      // Mayor caida
+      var worstFall2 = movs2.slice().sort(function(a,b){ return a.delta - b.delta; })[0];
+      if (worstFall2.delta < 0) {
+        html += '<div class="ccard"><div class="ccard-title">El que más cayó</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[worstFall2.pi]+'</div>' +
+          '<div class="ccard-sub">bajó del puesto '+worstFall2.antes+'° al '+worstFall2.ahora+'°</div></div>' +
+          '<div class="ccard-stat">▼'+Math.abs(worstFall2.delta)+'</div></div></div>';
+      }
+
+      // El milagro
+      var lastPlace2 = before2.maxRank;
+      var ibaUltimo2 = movs2.filter(function(m){ return m.antes === lastPlace2; });
+      if (ibaUltimo2.length === 1 && ibaUltimo2[0].delta > 0) {
+        html += '<div class="ccard"><div class="ccard-title">🙏 El milagro</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[ibaUltimo2[0].pi]+'</div>' +
+          '<div class="ccard-sub">iba último y subió '+ibaUltimo2[0].delta+' puesto'+(ibaUltimo2[0].delta!==1?'s':'')+'</div></div>' +
+          '<div class="ccard-stat">⛰️</div></div></div>';
+      }
+    }
+
+    // Paso a paso: diferencia 1ro vs 2do (sin contar empatados como distintos)
+    if (after2.sorted.length >= 2) {
+      var lideres2 = after2.sorted.filter(function(s){ return after2.pos[s.pi] === 1; });
+      var segundos2 = after2.sorted.filter(function(s){ return after2.pos[s.pi] === (lideres2.length+1); });
+      if (lideres2.length > 1) {
+        html += '<div class="ccard"><div class="ccard-title">🤝 Empate en la punta</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+lideres2.map(function(s){return P[s.pi];}).join(', ')+'</div>' +
+          '<div class="ccard-sub">comparten el primer lugar con '+lideres2[0].p+' puntos</div></div>' +
+          '<div class="ccard-stat">🤝</div></div></div>';
+      } else if (segundos2.length > 0) {
+        var diff12_2 = lideres2[0].p - segundos2[0].p;
+        html += '<div class="ccard"><div class="ccard-title">📏 Paso a paso</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[lideres2[0].pi]+' lidera por '+diff12_2+' punto'+(diff12_2!==1?'s':'')+'</div>' +
+          '<div class="ccard-sub">sobre '+segundos2.map(function(s){return P[s.pi];}).join(', ')+' (2°)</div></div>' +
+          '<div class="ccard-stat">+'+diff12_2+'</div></div></div>';
+      }
+    }
+
+    // Promedio general
+    var totalPts2 = after2.sorted.reduce(function(s,x){ return s + x.p; }, 0);
+    var avg2 = (totalPts2 / P.length).toFixed(1);
+    var avgPct2 = Math.round(totalPts2 / (P.length * miByOrder2.length) * 100);
+    html += '<div class="ccard"><div class="ccard-title">📊 Promedio del grupo</div>' +
+      '<div class="ccard-row"><div><div class="ccard-main">'+avg2+' aciertos</div>' +
+      '<div class="ccard-sub">sobre '+miByOrder2.length+' partido'+(miByOrder2.length!==1?'s':'')+' jugado'+(miByOrder2.length!==1?'s':'')+'</div></div>' +
+      '<div class="ccard-stat">'+avgPct2+'%</div></div></div>';
+
+    // La tabla de abajo
+    var ultimos2 = after2.sorted.filter(function(s){ return after2.pos[s.pi] === after2.maxRank; });
+    if (ultimos2.length === 1) {
+      html += '<div class="ccard"><div class="ccard-title">📉 La tabla de abajo</div>' +
+        '<div class="ccard-row"><div><div class="ccard-main">'+P[ultimos2[0].pi]+'</div>' +
+        '<div class="ccard-sub">está último con '+ultimos2[0].p+'/'+miByOrder2.length+' aciertos</div></div>' +
+        '<div class="ccard-stat">🔚</div></div></div>';
+    } else if (ultimos2.length > 1) {
+      html += '<div class="ccard"><div class="ccard-title">📉 La tabla de abajo</div>' +
+        '<div class="ccard-row"><div><div class="ccard-main">'+ultimos2.length+' empatados últimos</div>' +
+        '<div class="ccard-sub">'+ultimos2.slice(0,8).map(function(s){return P[s.pi];}).join(', ')+(ultimos2.length>8?'...':'')+' con '+ultimos2[0].p+'/'+miByOrder2.length+'</div></div>' +
+        '<div class="ccard-stat">🔚</div></div></div>';
+    }
+
+    // Invictos / en cero
+    if (miByOrder2.length >= 2) {
+      var perfectos2 = [];
+      var ceros2 = [];
+      P.forEach(function(name, pi){
+        if (after2.pts[pi] === miByOrder2.length) perfectos2.push(name);
+        if (after2.pts[pi] === 0) ceros2.push(name);
+      });
+      if (perfectos2.length > 0 && perfectos2.length <= 5) {
+        html += '<div class="ccard"><div class="ccard-title">✅ Siguen invictos</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+perfectos2.join(', ')+'</div>' +
+          '<div class="ccard-sub">'+miByOrder2.length+'/'+miByOrder2.length+' aciertos</div></div>' +
+          '<div class="ccard-stat">'+perfectos2.length+'</div></div></div>';
+      }
+      if (ceros2.length > 0 && ceros2.length <= 5) {
+        html += '<div class="ccard"><div class="ccard-title">💀 Siguen en cero</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+ceros2.join(', ')+'</div>' +
+          '<div class="ccard-sub">0/'+miByOrder2.length+' aciertos</div></div>' +
+          '<div class="ccard-stat">'+ceros2.length+'</div></div></div>';
+      }
+    }
+
+    // Racha caliente / fria
+    if (miByOrder2.length >= 3) {
+      var streakStats2 = P.map(function(name, pi){
         var curOk = 0, maxOk = 0, curKo = 0, maxKo = 0;
-        miByDate.forEach(function(mi){
+        miByOrder2.forEach(function(mi){
           if (PK[pi][mi] === results[mi]) {
             curOk++; maxOk = Math.max(maxOk, curOk); curKo = 0;
           } else {
@@ -8027,19 +8151,19 @@ function updateCuriosidades() {
         });
         return {pi: pi, maxOk: maxOk, maxKo: maxKo};
       });
-      var hotStreak = streakStats.slice().sort(function(a,b){ return b.maxOk - a.maxOk; })[0];
-      var coldStreak = streakStats.slice().sort(function(a,b){ return b.maxKo - a.maxKo; })[0];
+      var hotStreak2 = streakStats2.slice().sort(function(a,b){ return b.maxOk - a.maxOk; })[0];
+      var coldStreak2 = streakStats2.slice().sort(function(a,b){ return b.maxKo - a.maxKo; })[0];
 
-      if (hotStreak.maxOk >= 3) {
-        html += '<div class="ccard"><div class="ccard-title">Racha caliente</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[hotStreak.pi]+'</div>' +
-          '<div class="ccard-sub">acertó '+hotStreak.maxOk+' resultados seguidos</div></div>' +
+      if (hotStreak2.maxOk >= 3) {
+        html += '<div class="ccard"><div class="ccard-title">🔥 Racha caliente</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[hotStreak2.pi]+'</div>' +
+          '<div class="ccard-sub">acertó '+hotStreak2.maxOk+' resultados seguidos</div></div>' +
           '<div class="ccard-stat">🔥</div></div></div>';
       }
-      if (coldStreak.maxKo >= 3) {
-        html += '<div class="ccard"><div class="ccard-title">Racha fría</div>' +
-          '<div class="ccard-row"><div><div class="ccard-main">'+P[coldStreak.pi]+'</div>' +
-          '<div class="ccard-sub">erró '+coldStreak.maxKo+' resultados seguidos</div></div>' +
+      if (coldStreak2.maxKo >= 3) {
+        html += '<div class="ccard"><div class="ccard-title">🧊 Racha fría</div>' +
+          '<div class="ccard-row"><div><div class="ccard-main">'+P[coldStreak2.pi]+'</div>' +
+          '<div class="ccard-sub">erró '+coldStreak2.maxKo+' resultados seguidos</div></div>' +
           '<div class="ccard-stat">🧊</div></div></div>';
       }
     }
