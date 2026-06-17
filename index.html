@@ -7385,7 +7385,7 @@ var PK = [[3, 3, 1, 1, 3, 2, 1, 3, 2, 2, 3, 1, 1, 2, 2, 1, 3, 1, 1, 2, 2, 1, 3, 
 var MATCHES = [["México", "Sudáfrica"], ["Corea del Sur", "Rep. Checa"], ["Rep. Checa", "Sudáfrica"], ["México", "Corea del Sur"], ["Rep. Checa", "México"], ["Sudáfrica", "Corea del Sur"], ["Canadá", "Bosnia-Herz."], ["Qatar", "Suiza"], ["Suiza", "Bosnia-Herz."], ["Canadá", "Qatar"], ["Suiza", "Canadá"], ["Bosnia-Herz.", "Qatar"], ["Brasil", "Marruecos"], ["Haití", "Escocia"], ["Escocia", "Marruecos"], ["Brasil", "Haití"], ["Escocia", "Brasil"], ["Marruecos", "Haití"], ["Estados Unidos", "Paraguay"], ["Australia", "Turquía"], ["Turquía", "Paraguay"], ["Estados Unidos", "Australia"], ["Turquía", "Estados Unidos"], ["Paraguay", "Australia"], ["Alemania", "Curazao"], ["Costa de Marfil", "Ecuador"], ["Alemania", "Costa de Marfil"], ["Ecuador", "Curazao"], ["Ecuador", "Alemania"], ["Curazao", "Costa de Marfil"], ["Países Bajos", "Japón"], ["Suecia", "Túnez"], ["Países Bajos", "Suecia"], ["Túnez", "Japón"], ["Japón", "Suecia"], ["Túnez", "Países Bajos"], ["Bélgica", "Egipto"], ["Irán", "Nueva Zelanda"], ["Bélgica", "Irán"], ["Nueva Zelanda", "Egipto"], ["Nueva Zelanda", "Bélgica"], ["Egipto", "Irán"], ["España", "Cabo Verde"], ["Arabia Saudita", "Uruguay"], ["España", "Arabia Saudita"], ["Uruguay", "Cabo Verde"], ["Uruguay", "España"], ["Cabo Verde", "Arabia Saudita"], ["Francia", "Senegal"], ["Irak", "Noruega"], ["Francia", "Irak"], ["Noruega", "Senegal"], ["Noruega", "Francia"], ["Senegal", "Irak"], ["Argentina", "Argelia"], ["Austria", "Jordania"], ["Argentina", "Austria"], ["Jordania", "Argelia"], ["Argelia", "Austria"], ["Jordania", "Argentina"], ["Portugal", "R.D. Congo"], ["Uzbekistán", "Colombia"], ["Portugal", "Uzbekistán"], ["Colombia", "R.D. Congo"], ["Colombia", "Portugal"], ["R.D. Congo", "Uzbekistán"], ["Inglaterra", "Croacia"], ["Ghana", "Panamá"], ["Inglaterra", "Ghana"], ["Panamá", "Croacia"], ["Panamá", "Inglaterra"], ["Croacia", "Ghana"]];
 var MATCH_DATES = ["11-Jun", "11-Jun", "18-Jun", "18-Jun", "24-Jun", "24-Jun", "12-Jun", "13-Jun", "18-Jun", "18-Jun", "24-Jun", "24-Jun", "13-Jun", "13-Jun", "19-Jun", "19-Jun", "24-Jun", "24-Jun", "12-Jun", "13-Jun", "19-Jun", "19-Jun", "25-Jun", "25-Jun", "14-Jun", "14-Jun", "20-Jun", "20-Jun", "25-Jun", "25-Jun", "14-Jun", "14-Jun", "20-Jun", "20-Jun", "25-Jun", "25-Jun", "15-Jun", "15-Jun", "21-Jun", "21-Jun", "26-Jun", "26-Jun", "15-Jun", "15-Jun", "21-Jun", "21-Jun", "26-Jun", "26-Jun", "16-Jun", "16-Jun", "22-Jun", "22-Jun", "26-Jun", "26-Jun", "16-Jun", "16-Jun", "22-Jun", "22-Jun", "27-Jun", "27-Jun", "17-Jun", "17-Jun", "23-Jun", "23-Jun", "27-Jun", "27-Jun", "17-Jun", "17-Jun", "23-Jun", "23-Jun", "27-Jun", "27-Jun"];
 var SK = 'prode2026_results';
-var results = {"0":1,"1":1,"6":3,"7":3,"12":3,"13":2,"18":1,"19":1,"24":1,"30":3,"25":1,"31":1,"42":3,"36":3,"43":3,"37":3,"48":1,"49":2,"54":1,"55":1};
+var results = {"0":1,"1":1,"6":3,"7":3,"12":3,"13":2,"18":1,"19":1,"24":1,"30":3,"25":1,"31":1,"42":3};
 var saveTimer = null;
 var LEV = {1:'L', 2:'V', 3:'E'};
 var LEV_INV = {'L':1,'V':2,'E':3};
@@ -7934,30 +7934,51 @@ function renderPunteros() {
   });
   html += '</div>';
 
-  // ── Amenaza a la punta (escoltas a 1 punto que eligieron distinto) ──
-  var pickMayoria = 1, maxCnt = -1;
-  [1,2,3].forEach(function(code){
-    if ((conteo[code]||0) > maxCnt) { maxCnt = conteo[code]||0; pickMayoria = code; }
-  });
+  // ── Amenaza a la punta (escoltas a 1 punto que eligieron distinto a TODOS los punteros) ──
+  // Para cada resultado r del proximo partido:
+  //  - el escolta (a 1 pto) que eligio r sube a ptsLider si acierta
+  //  - los punteros que eligieron r suben a ptsLider+1 (se escapan)
+  //  - el escolta ALCANZA la punta solo si NINGUN puntero eligio r; si algun
+  //    puntero eligio r, el escolta solo SE ACERCA (queda 1 abajo).
   var escoltas = R.sorted.filter(function(s){ return R.pts[s.pi] === (ptsLider - 1); });
-  var amenazas = escoltas.filter(function(s){ return PK[s.pi][proxMi] !== pickMayoria; });
+  // que opciones eligieron los punteros (para saber si se escapan)
+  var lideresPicks = {1:0, 2:0, 3:0};
+  lideres.forEach(function(s){ lideresPicks[PK[s.pi][proxMi]]++; });
+
+  // escoltas que eligieron distinto a la mayoria de punteros => candidatos a mostrar
+  // (mostramos todos los que NO comparten el pick con TODOS los punteros)
+  var amenazas = escoltas.filter(function(s){
+    var r = PK[s.pi][proxMi];
+    // si todos los punteros eligieron lo mismo que el escolta, no es amenaza (van juntos)
+    return !(lideresPicks[r] === lideres.length);
+  });
 
   if (amenazas.length > 0) {
-    var amenConteo = {1:[], 2:[], 3:[]};
-    amenazas.forEach(function(s){ amenConteo[PK[s.pi][proxMi]].push(P[s.pi]); });
     html += '<div class="ccat">⚠️ Amenaza a la punta</div>';
     html += '<div class="ccard" style="border-color:var(--orange);">' +
       '<div class="ccard-title">' + amenazas.length + ' escolta' + (amenazas.length!==1?'s':'') + ' a 1 punto ' + (amenazas.length!==1?'eligieron':'eligió') + ' distinto</div>' +
-      '<div class="ccard-sub" style="margin-bottom:8px;">Si aciertan en ' + matchLabel(proxMi) + ' y el puntero no, alcanzan o pasan la punta:</div>';
+      '<div class="ccard-sub" style="margin-bottom:8px;">Qué pasa en ' + matchLabel(proxMi) + ' según lo que eligió cada uno:</div>';
     var opcs = [[1, ph], [3, 'Empate'], [2, pa]];
     opcs.forEach(function(op){
       var code = op[0], label = op[1];
-      if (amenConteo[code].length > 0) {
+      var nombres = amenazas.filter(function(s){ return PK[s.pi][proxMi] === code; }).map(function(s){ return P[s.pi]; });
+      if (nombres.length > 0) {
         var emoji2 = code === 1 ? '🏠' : (code === 2 ? '✈️' : '🤝');
+        // si algun puntero tambien eligio 'code', ese puntero se escapa => el escolta solo se acerca
+        var algunLiderAcierta = lideresPicks[code] > 0;
+        var miniTxt, badge;
+        if (algunLiderAcierta) {
+          miniTxt = 'si sale ' + label + ', un puntero también acierta y se escapa → solo se acercan a 1 pto';
+          badge = '↗️';
+        } else {
+          miniTxt = 'si sale ' + label + ', ningún puntero acierta → ' + (nombres.length>1?'alcanzan':'alcanza') + ' la punta';
+          badge = '🔥';
+        }
         html += '<div class="ccard-row" style="border-top:1px dashed var(--border);padding-top:6px;margin-top:6px;">' +
           '<div><div class="ccard-main" style="font-size:14px;">' + emoji2 + ' ' + label + '</div>' +
-          '<div class="ccard-sub">' + amenConteo[code].join(', ') + '</div></div>' +
-          '<div class="ccard-stat">⚠️</div></div>';
+          '<div class="ccard-sub">' + nombres.join(', ') + '</div>' +
+          '<div class="ccard-sub" style="color:var(--orange);margin-top:2px;">' + miniTxt + '</div></div>' +
+          '<div class="ccard-stat">' + badge + '</div></div>';
       }
     });
     html += '</div>';
@@ -8001,6 +8022,34 @@ function updateCuriosidades() {
 
   var html = '';
   var liveHtml = '';
+
+  // ── Pronósticos de los partidos de HOY (barras de %) ──
+  var hoyART = getTodayART();
+  var hoyMisCur = [];
+  for (var hm = 0; hm < 72; hm++) {
+    if (MATCH_DATES[hm] === hoyART) hoyMisCur.push(hm);
+  }
+  // ordenar por horario (madrugada al final) usando el orden del card en pantalla
+  hoyMisCur.sort(function(a,b){ return a - b; });
+  if (hoyMisCur.length > 0) {
+    liveHtml += '<div class="ccat">📊 Pronósticos de hoy</div>';
+    hoyMisCur.forEach(function(mi){
+      var c = pickCounts(mi);
+      var total = c.l + c.e + c.v;
+      var jugado = (String(mi) in results);
+      var resTxt = '';
+      if (jugado) {
+        var rcode = results[String(mi)];
+        var rlabel = rcode === 1 ? ('Ganó ' + MATCHES[mi][0]) : (rcode === 2 ? ('Ganó ' + MATCHES[mi][1]) : 'Empató');
+        resTxt = '<div class="ccard-sub" style="color:var(--green);font-weight:700;margin-top:2px;">✅ ' + rlabel + '</div>';
+      }
+      liveHtml += '<div class="ccard"><div class="ccard-title">' + matchLabel(mi) + '</div>' +
+        '<div class="ccard-sub">' + total + ' pronósticos</div>' +
+        resTxt +
+        barRow(mi, c) + '</div>';
+    });
+  }
+
   // 10. EN VIVO - analisis partido a partido
   var resKeys2 = Object.keys(results);
   if (resKeys2.length > 0 && P.length > 0) {
