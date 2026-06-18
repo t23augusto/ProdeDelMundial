@@ -7584,9 +7584,7 @@ function buildLiveTickerItems() {
   // Orden cronologico de los partidos jugados
   var miByOrder = resKeys.map(function(k){ return parseInt(k); });
   miByOrder.sort(function(a,b){
-    var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
-    if (da !== db) return da - db;
-    return a - b;
+    return matchSortKey(a) - matchSortKey(b);
   });
   var lastMi = miByOrder[miByOrder.length-1];
   var prevMis = miByOrder.slice(0, miByOrder.length-1);
@@ -7888,14 +7886,10 @@ function renderPunteros() {
   if (lideres.length === 0) { wrap.style.display = 'none'; return; }
   var ptsLider = lideres[0].p;
 
-  // Proximo partido = primero sin resultado, en orden cronologico
+  // Proximo partido = primero sin resultado, en orden cronologico (dia + hora real)
   var allMiOrder = [];
   for (var pm = 0; pm < 72; pm++) allMiOrder.push(pm);
-  allMiOrder.sort(function(a,b){
-    var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
-    if (da !== db) return da - db;
-    return a - b;
-  });
+  allMiOrder.sort(function(a,b){ return matchSortKey(a) - matchSortKey(b); });
   var proxMi = -1;
   for (var pmi = 0; pmi < allMiOrder.length; pmi++) {
     if (!(String(allMiOrder[pmi]) in results)) { proxMi = allMiOrder[pmi]; break; }
@@ -8002,6 +7996,28 @@ function matchLabel(mi) {
   return MATCHES[mi][0] + ' vs ' + MATCHES[mi][1];
 }
 
+// Devuelve la hora de kickoff de un partido (en minutos desde 00:00) leida de su card.
+// Las madrugadas (00:00-02:59) se tratan como "+24h" para que ordenen al final de su jornada.
+function matchTimeMin(mi) {
+  var el = document.querySelector('#card_' + mi + ' .mtime');
+  if (!el) return 9999;
+  var m = el.textContent.match(/(\d{1,2}):(\d{2})/);
+  if (!m) return 9999;
+  var hh = parseInt(m[1], 10), mm = parseInt(m[2], 10);
+  var mins = hh * 60 + mm;
+  if (hh < 3) mins += 24 * 60; // madrugada: cuenta al final de la jornada
+  return mins;
+}
+
+// Clave cronologica ordenable: mes*100000 + dia*1000 + (hora*60+min ajustado).
+function matchSortKey(mi) {
+  var d = MATCH_DATES[mi]; // ej "15-Jun"
+  var parts = d.split('-');
+  var dd = parseInt(parts[0], 10);
+  var monIdx = MONTH_ABBR.indexOf(parts[1]); // 0-based
+  return (monIdx + 1) * 100000 + dd * 1000 + matchTimeMin(mi);
+}
+
 function barRow(mi, c) {
   var total = c.l + c.e + c.v;
   if (total === 0) return '';
@@ -8029,8 +8045,8 @@ function updateCuriosidades() {
   for (var hm = 0; hm < 72; hm++) {
     if (MATCH_DATES[hm] === hoyART) hoyMisCur.push(hm);
   }
-  // ordenar por horario (madrugada al final) usando el orden del card en pantalla
-  hoyMisCur.sort(function(a,b){ return a - b; });
+  // ordenar por horario real (madrugada al final)
+  hoyMisCur.sort(function(a,b){ return matchSortKey(a) - matchSortKey(b); });
   if (hoyMisCur.length > 0) {
     liveHtml += '<div class="ccat">📊 Pronósticos de hoy</div>';
     hoyMisCur.forEach(function(mi){
@@ -8055,9 +8071,7 @@ function updateCuriosidades() {
   if (resKeys2.length > 0 && P.length > 0) {
     var miByOrder2 = resKeys2.map(function(k){ return parseInt(k); });
     miByOrder2.sort(function(a,b){
-      var da = parseInt(MATCH_DATES[a]), db = parseInt(MATCH_DATES[b]);
-      if (da !== db) return da - db;
-      return a - b;
+      return matchSortKey(a) - matchSortKey(b);
     });
     var lastMi2 = miByOrder2[miByOrder2.length-1];
     var prevMis2 = miByOrder2.slice(0, miByOrder2.length-1);
@@ -8477,10 +8491,7 @@ function showPlayerCard(pi) {
   var miOrder = [];
   for (var mi = 0; mi < 72; mi++) miOrder.push(mi);
   miOrder.sort(function(a,b){
-    var da = parseInt(MATCH_DATES[a]);
-    var db = parseInt(MATCH_DATES[b]);
-    if (da !== db) return da - db;
-    return a - b;
+    return matchSortKey(a) - matchSortKey(b);
   });
   var lastDate = null;
   miOrder.forEach(function(mi){
