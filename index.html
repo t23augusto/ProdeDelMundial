@@ -227,22 +227,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
    TEXTURAS + GLASSMORPHISM + ANIMACIONES (estilo iOS / vidrio)
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Textura de fondo: manchas de color suaves tipo "agua" + grilla fina ── */
+/* ── Textura de fondo: tramado diagonal de colores FIFA (tenue, como el header) ── */
 body{
   background:
-    radial-gradient(circle at 12% 18%, rgba(123,45,142,.10), transparent 38%),
-    radial-gradient(circle at 88% 12%, rgba(0,114,206,.10), transparent 36%),
-    radial-gradient(circle at 78% 82%, rgba(0,180,166,.10), transparent 40%),
-    radial-gradient(circle at 20% 88%, rgba(255,107,53,.08), transparent 38%),
+    repeating-linear-gradient(115deg,
+      rgba(123,45,142,.05) 0px, rgba(123,45,142,.05) 60px,
+      rgba(0,114,206,.05) 60px, rgba(0,114,206,.05) 120px,
+      rgba(0,180,166,.05) 120px, rgba(0,180,166,.05) 180px,
+      rgba(255,107,53,.045) 180px, rgba(255,107,53,.045) 240px,
+      rgba(200,230,60,.05) 240px, rgba(200,230,60,.05) 300px),
+    radial-gradient(circle at 12% 18%, rgba(123,45,142,.08), transparent 40%),
+    radial-gradient(circle at 88% 78%, rgba(0,180,166,.08), transparent 42%),
     var(--bg);
   background-attachment:fixed;
-}
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(26,26,26,.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(26,26,26,.022) 1px, transparent 1px);
-  background-size:34px 34px;
 }
 .hero, .ticker-wrap, .topbar, .view, .bnav{position:relative;z-index:1;}
 
